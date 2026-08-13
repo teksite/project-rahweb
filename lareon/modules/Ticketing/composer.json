@@ -1,0 +1,51 @@
+{
+    "name": "teksite/ticketing",
+    "description": "This package is made for lareon (laravel)",
+    "keywords": ["laravel", "laravel" , "Ticketing"],
+
+    "authors": [
+        {
+            "name": "Sina Zangiband",
+            "email": "sina.zangiband@gmail.com",
+            "homepage": "https://teksite.net",
+            "role":"manager"
+        },
+        {
+            "name": "Sina zb",
+            "email": "sina.zangiband@laratek.ir",
+            "homepage": "https://laratek.ir",
+            "role": "developer"
+        }
+    ],
+    "require": {
+
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lareon\\Modules\\Ticketing\\App\\Providers\\TicketingServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Lareon\\Modules\\Ticketing\\App\\": "app/",
+            "Lareon\\Modules\\Ticketing\\Database\\Factories\\": "database/factories/",
+            "Lareon\\Modules\\Ticketing\\Database\\Seeders\\": "database/seeders/"
+        },
+         "files": [
+
+         ]
+    },
+    "require-dev": {
+
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lareon\\Modules\\Ticketing\\Tests\\": "tests/"
+        }
+    }
+}

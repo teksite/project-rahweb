@@ -1,0 +1,10 @@
+{
+    "version":"1.0.0",
+    "id": "Ticketing",
+    "title": "Ticketing",
+    "alias": "ticketing",
+    "description": "",
+    "keywords": [],
+    "providers": "Lareon\\Modules\\Ticketing\\App\\Providers\\TicketingServiceProvider"
+}
+
