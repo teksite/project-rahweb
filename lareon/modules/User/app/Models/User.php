@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,7 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Sanctum\HasApiTokens;
+use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\User\Database\Factories\UserFactory;
 use Teksite\Authorize\Traits\HasAuthorization;
 use Teksite\Extralaravel\Enums\MobilePatterns;
@@ -93,6 +95,12 @@ class User extends Authenticatable implements MustVerifyEmail , PasskeyUser
         return Attribute::make(
             get: fn () => ucfirst($this->name) . ' ' . ucfirst($this->lastname)
         );
+    }
+
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 
 }
