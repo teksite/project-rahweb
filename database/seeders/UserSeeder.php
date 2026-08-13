@@ -24,6 +24,7 @@ class UserSeeder extends Seeder
             'slug'     => '989126037279',
 
         ]);
+
         $user->markEmailAsVerified();
         $user->markPhoneAsVerified();
         $ownerRole = Role::query()->firstWhere('title', 'owner');
@@ -33,8 +34,12 @@ class UserSeeder extends Seeder
 
         $userRole = Role::query()->firstWhere('title', 'user');
 
-        User::factory(45)->create([
+        $users = User::factory(45)->create([
             'parent_id' => $user->id,
         ]);
+
+        foreach ($users as $newUser) {
+            $newUser->roles()->attach($userRole->id);
+        }
     }
 }
