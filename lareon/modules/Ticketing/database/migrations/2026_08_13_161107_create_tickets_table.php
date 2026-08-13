@@ -61,7 +61,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('tickets_api_requests');
-        Schema::dropIfExists('tickets_api_requests');
+        Schema::dropIfExists('tickets_approvals');
         Schema::dropIfExists('tickets');
     }
 };

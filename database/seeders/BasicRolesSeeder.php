@@ -15,14 +15,24 @@ class BasicRolesSeeder extends Seeder
     public function run(): void
     {
 
-        $allPermissions = Permission::query()->select(['id' ,'title'])->get();
+        $allPermissions = Permission::query()->select(['id', 'title'])->get();
+        $allPermissionIds = $allPermissions->pluck('id')->all();
+        $userPermissionIds = $allPermissions->filter(fn ($permission) => str_starts_with($permission->title, 'panel'))->pluck('id')->all();
+        $ticketPermissionIds = $allPermissions->filter(fn ($permission) => str_starts_with($permission->title, 'admin.ticket'))->pluck('id')->all();
+
 
         foreach (Role::query()->whereIn('title' , ['owner', 'administrator', 'admin',])->get() as $role) {
-            $role->permissions()->sync($allPermissions->pluck('id')->toArray());
+            $role->permissions()->sync($allPermissionIds);
         }
 
         foreach (Role::query()->whereIn('title' , ['user'])->get() as $role) {
-            $role->permissions()->sync($allPermissions->where('title' ,"LIKE" ,"panel%")->pluck('id')->toArray());
+            $role->permissions()->sync($userPermissionIds);
+        }
+
+
+
+        foreach (Role::query()->whereIn('title', ['chief ticket manager', 'ticket manager 2'])->get() as $role) {
+            $role->permissions()->sync($ticketPermissionIds);
         }
     }
 }
