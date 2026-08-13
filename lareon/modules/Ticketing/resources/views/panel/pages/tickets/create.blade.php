@@ -1,4 +1,4 @@
-<x-lareon::panel-editor type="create" method="'POST'" :action="route('panel.tickets.store')">
+<x-lareon::panel-editor type="create" method="POST" :action="route('panel.tickets.store')" :hasFile="true">
     @section('form')
         <section class="">
             <x-lareon::box type="y" class="space-y-3 xl:col-span-3">
@@ -6,6 +6,10 @@
                     <x-lareon::editor.input :required="true" labelPosition="top" :label="__('title')" name="title"/>
                 </div>
                 <x-lareon::editor.input-textarea rows="16" :required="true" labelPosition="top" :label="__('description')" name="body"></x-lareon::editor.input-textarea>
+
+                <div class="w-full md:w-1/2">
+                    <x-lareon::editor.input type="file" :required="true" labelPosition="top" :label="__('file')" name="file"/>
+                </div>
             </x-lareon::box>
         </section>
     @endsection

@@ -55,10 +55,7 @@ class TicketLogic
     public function create(array $inputs = []): ServiceResult
     {
         return ServiceWrapper::make(true)->do(function () use ($inputs) {
-            $inputs['slug'] ??= strtolower(uniqid() . '-' . Str::random(4));
-            $inputs['parent_id'] = auth()->id();
-            $ticket = Ticket::create($inputs);
-            $rolesIds = $this->assignRole($ticket, config('general.default_user_role', 'user'));
+            $this->
             return $ticket;
         })->run();
     }
@@ -69,25 +66,10 @@ class TicketLogic
     public function update(Ticket $ticket, array $inputs = []): ServiceResult
     {
         return ServiceWrapper::make(false)->do(function () use ($ticket, $inputs) {
-            if (!isset($inputs['password']) || $inputs['password'] === null)  unset($inputs['password']);
 
-            $ticket->fill(Arr::except($inputs, ['permissions', 'roles', 'enable_2fa', 'meta', 'seo']));
-            $this->toggle2fa($ticket, $inputs['enable_2fa'] ?? null);
-            $ticket->save();
-            return $ticket->refresh();
         })->run();
     }
 
-
-    /**
-     * @throws \Throwable
-     */
-    public function changePassword(Ticket $ticket, array $inputs = []): ServiceResult
-    {
-        return ServiceWrapper::make(false)->do(function () use ($ticket, $inputs) {
-            $ticket->update(['password' =>$inputs['password']]);
-        })->run();
-    }
 
     /**
      * @throws \Throwable
@@ -95,12 +77,9 @@ class TicketLogic
     public function delete(Ticket $ticket): ServiceResult
     {
         return ServiceWrapper::make(false)->do(function () use ($ticket) {
-            $ticket->roles()->detach();
             $ticket->delete();
         })->run();
     }
-
-
 
 }
 

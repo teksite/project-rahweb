@@ -47,9 +47,7 @@
         default => 'plus'
     };
 
-    if ($hasFile) {
-        $formClasses .= " enctype='multipart/form-data'";
-    }
+
     $styleClass=config('lareon.admin.layout.editor')=== 'two_column' ? 'md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-7' : '';
 @endphp
 
@@ -60,7 +58,7 @@
 
     @yield('form.before')
 
-    <form id="{{ $id }}" class="inner-content" method="{{ $method === 'GET' ? 'GET' : 'POST' }}" action="{{ $action ?? url()->current() }}" {{$hasFile ?  'enctype="multipart/form-data"' : ''}}>
+    <form id="{{ $id }}" class="inner-content" method="{{ $method === 'GET' ? 'GET' : 'POST' }}" action="{{ $action ?? url()->current() }}" {{$hasFile ?  'enctype=multipart/form-data' : ''}}>
         @csrf
         @method($method)
         <div class="grid grid-cols-1 gap-6 {{$styleClass}} ">
