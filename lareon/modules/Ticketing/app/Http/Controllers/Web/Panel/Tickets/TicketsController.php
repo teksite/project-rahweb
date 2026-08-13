@@ -47,6 +47,6 @@ class TicketsController extends Controller implements HasMiddleware
     {
         $res =$this->logic->create($request->validated());
 
-        return Responder::fromResult($res , __('your ticket created') ,__('something went wrong') ,route('panel.tickets.index'));
+        return Responder::fromResult($res , __('your ticket created') ,__('something went wrong') ,route('panel.tickets.index'))->go();
     }
 }

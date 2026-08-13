@@ -1,8 +1,11 @@
 <x-lareon::panel-layout>
     @section('title', __('lareon::global.crud.titles.list',['attribute'=>__('tickets')]))
-    <div class="flex items-center justify-end">
+    <div class="flex items-center justify-between">
         <div class="w-64 my-6">
             <x-lareon::links.nav :href="route('panel.tickets.create')" :content="__('lareon::global.buttons.new_one')" color="create" can="panel.ticket.create"/>
+        </div>
+        <div class="w-64 my-6">
+            <x-lareon::search/>
         </div>
     </div>
     <x-lareon::table :rows="$tickets" :headers="['id'=>'#','title'=>__('title'),'created_at'=>__('created at')]">
