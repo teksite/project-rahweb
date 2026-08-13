@@ -28,17 +28,19 @@ class TicketsController extends Controller implements HasMiddleware
      */
     public function index()
     {
-        $tickets = $this->logic->allByUser();
+        $tickets = $this->logic->allByUser()->result;
+
         return view('ticketing::panel.pages.tickets.index', compact('tickets'));
     }
 
     public function create()
     {
-        
+        return view('ticketing::panel.pages.tickets.create', );
+
     }
 
     public function store()
     {
-        
+
     }
 }
