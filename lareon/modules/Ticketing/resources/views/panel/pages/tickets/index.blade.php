@@ -8,14 +8,11 @@
             <x-lareon::search/>
         </div>
     </div>
-    <x-lareon::table :rows="$tickets" :headers="['id'=>'#','title'=>__('title'),'created_at'=>__('created at')]">
+    <x-lareon::table :rows="$tickets" :headers="['id'=>'#','title'=>__('title'),'status'=>__('status'),'created_at'=>__('created at')]">
 
         @foreach($tickets as $key=>$ticket)
             <tr>
                 <td class="p-3">{{$tickets->firstItem() + $key}}</td>
-                <td>
-                    <x-lareon::media-placeholder src="{{$ticket->primaryMedia?->url}}" alt="{{$ticket->title}}" type="image"/>
-                </td>
                 <td>{{$ticket->title}}</td>
                 <td>{!! $ticket->status->value !!}</td>
                 <td>
