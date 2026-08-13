@@ -1,4 +1,5 @@
 <?php
+
 namespace Lareon\Modules\Ticketing\App\Http\Requests\Panel;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,9 +22,9 @@ class NewTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'title' => 'required|string|max:255',
-            'body' => 'required|string',
-            'file' => 'required|file|mimes:jpeg,jpg,png,pdf|max:2000',
+            'title' => 'required|string|max:255',
+            'body'  => 'required|string',
+            'file'  => 'required|file|mimes:jpeg,jpg,png,pdf|max:2000',
         ];
     }
 }

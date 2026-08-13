@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 
-#[Fillable('title', 'body', 'file', 'status',)]
+#[Fillable('title', 'body', 'file', 'status','user_id')]
 class Ticket extends Model
 {
     protected function casts(): array

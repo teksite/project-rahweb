@@ -8,6 +8,7 @@ use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
 use Lareon\Modules\Ticketing\App\Logics\TicketLogic;
+use Teksite\Handler\Facade\Responder;
 
 class TicketsController extends Controller implements HasMiddleware
 {
@@ -44,7 +45,8 @@ class TicketsController extends Controller implements HasMiddleware
      */
     public function store(NewTicketRequest $request)
     {
-        $this->logic->create($request->validated());
-        return view('ticketing::panel.pages.tickets.create', );
+        $res =$this->logic->create($request->validated());
+
+        return Responder::fromResult($res , __('your ticket created') ,__('something went wrong') ,route('panel.tickets.index'));
     }
 }
