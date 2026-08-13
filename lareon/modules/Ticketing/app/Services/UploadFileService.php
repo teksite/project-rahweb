@@ -6,7 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
-class UploadFile
+class UploadFileService
 {
     public function __construct(protected string $disk = 'public') {}
 
