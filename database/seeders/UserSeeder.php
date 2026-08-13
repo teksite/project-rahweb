@@ -16,25 +16,25 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $user = User::query()->create([
-            'name' => 'sina',
+            'name'     => 'sina',
             'lastname' => 'Zangiband',
-            'email' => 'sina.zangiband@gmail.com',
-            'password' => Hash::make('sina.zangiband@gmail.com',),
-            'phone' => '989126037279',
-            'slug' => '989126037279',
+            'email'    => 'sina.zangiband@gmail.com',
+            'password' => Hash::make('sina.zangiband@gmail.com'),
+            'phone'    => '989126037279',
+            'slug'     => '989126037279',
 
         ]);
         $user->markEmailAsVerified();
         $user->markPhoneAsVerified();
-        $ownerRole = Role::query()->firstWhere('title' ,'owner');
-        if ($ownerRole) {
-           $user->roles()->sync($ownerRole->id);
-        }
+        $ownerRole = Role::query()->firstWhere('title', 'owner');
 
-        $userRole = Role::query()->firstWhere('title' ,'user');
+        if ($ownerRole) $user->roles()->sync($ownerRole->id);
 
-       User::factory(45)->create([
-           'parent_id' => $user->id,
-       ]);
+
+        $userRole = Role::query()->firstWhere('title', 'user');
+
+        User::factory(45)->create([
+            'parent_id' => $user->id,
+        ]);
     }
 }
