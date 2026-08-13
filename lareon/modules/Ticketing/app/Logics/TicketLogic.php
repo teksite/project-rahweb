@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
+use Lareon\Modules\Ticketing\App\Services\UploadFileService;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
@@ -54,9 +55,14 @@ class TicketLogic
      */
     public function create(array $inputs = []): ServiceResult
     {
-        return ServiceWrapper::make(true)->do(function () use ($inputs) {
-            $this->
-            return $ticket;
+        $file = (new UploadFileService())->store($inputs['file']);
+
+        return ServiceWrapper::make(true)->do(function () use ($inputs, $file) {
+            $ticket = Ticket::query()->create([
+                'title' => $inputs['title'],
+                'body'  => $inputs['body'],
+                'file'  => $file,
+            ]);
         })->run();
     }
 
@@ -65,9 +71,7 @@ class TicketLogic
      */
     public function update(Ticket $ticket, array $inputs = []): ServiceResult
     {
-        return ServiceWrapper::make(false)->do(function () use ($ticket, $inputs) {
-
-        })->run();
+        return ServiceWrapper::make(true)->do(function () {})->run();
     }
 
 
