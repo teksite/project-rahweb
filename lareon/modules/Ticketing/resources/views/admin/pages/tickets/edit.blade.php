@@ -1,4 +1,5 @@
-<x-lareon::admin-editor :action="route('admin.tickets.update' , $ticket)" method="update" :instance="$ticket" >
+@php use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum; @endphp
+<x-lareon::admin-editor :action="route('admin.tickets.update' , $ticket)" method="update" :instance="$ticket">
     @section('title', __('lareon::global.crud.titles.edit',['attribute'=>__('page') . " ($ticket->title)"]))
     @section('header.start')
         <x-lareon::links.nav :href="route('admin.tickets.index')" :content="__('lareon::global.buttons.all_attribute' ,['attribute'=>__('tickets')])" color="index"/>
@@ -6,20 +7,32 @@
 
     @section('form')
         <x-lareon::editor.tabs.item :title="__('content')">
-            <div class="space-y-6">
-                <x-lareon::editor.input :required="true" labelPosition="start" :label="__('title')" name="title" :value="$ticket->title" :placeholder="__('lareon::global.placeholders.write.two',['attribute'=>__('title') , 'item'=>__('page')])"/>
-                <x-lareon::editor.input-slug :required="true" labelPosition="start" :label="__('slug')" :value="$ticket->slug" :placeholder="__('lareon::global.placeholders.write.unique.two',['attribute'=>__('slug') , 'item'=>__('page')])"/>
-            </div>
-
-            <div class="space-y-6 y-box">
-                <x-lareon::editor.input-textarea :required="false" :label="__('excerpt')" name="excerpt" :placeholder="__('lareon::global.placeholders.write.one',['attribute'=>__('excerpt')])">{!! $ticket->excerpt !!}</x-lareon::editor.input-textarea>
-                <x-lareon::editor.section.input-editor rows="9" :required="false" :label="__('body')" name="body" :placeholder="__('lareon::global.placeholders.write.one',['attribute'=>__('body')])">{!! $ticket->body!!}</x-lareon::editor.section.input-editor>
-            </div>
+            <x-lareon::editor.tabs.section>
+                <h2>
+                    {{$ticket->title}}
+                </h2>
+                <div>
+                    <p>
+                        {{$ticket->body}}
+                    </p>
+                </div>
+            </x-lareon::editor.tabs.section>
 
             <x-slot:aside>
+                <x-lareon::editor.tabs.section>
+                    <x-lareon::editor.input-select name="status" :label="__('status')" :value="$approval->status->value">
+                        @foreach(TicketStatusEnum::cases() as $case)
+                            @continue(in_array($case , [TicketStatusEnum::PENDING,  TicketStatusEnum::IN_REVIEW]))
+                            <option value="{{$case->value}}">
+                                {{$case->label()}}
+                            </option>
+                        @endforeach
+                    </x-lareon::editor.input-select>
+                    <x-lareon::editor.input-textarea :required="false" :label="__('review')" name="review" :placeholder="__('lareon::global.placeholders.write.one',['attribute'=>__('review')])">{!! $approval->review !!}</x-lareon::editor.input-textarea>
+                </x-lareon::editor.tabs.section>
             </x-slot:aside>
 
-        </x-lareon::editor.tabs.item>
+        </x-lareon::editor.tabs.section>
     @endsection
 
 </x-lareon::admin-editor>

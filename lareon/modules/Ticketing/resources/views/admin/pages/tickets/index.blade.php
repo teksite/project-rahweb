@@ -7,7 +7,7 @@
                 <tr>
                     <td class="p-3">{{$tickets->firstItem() + $key}}</td>
                     <td>{{$ticket->title}}</td>
-                    <td>{{$ticket->status->label()}}</td>
+                    <td>{!! $ticket->status->toHtml() !!}</td>
                     <td>
                         <x-lareon::date :date="$ticket->created_at"/>
                     </td>

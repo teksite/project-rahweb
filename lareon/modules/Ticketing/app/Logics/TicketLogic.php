@@ -56,7 +56,6 @@ class TicketLogic
     public function create(array $inputs = []): ServiceResult
     {
         $userId=  auth()->id();
-
         $file = (new UploadFileService())->store($inputs['file'] , $userId);
 
         return ServiceWrapper::make(true)->do(function () use ($userId, $inputs, $file) {
@@ -68,14 +67,6 @@ class TicketLogic
             ]);
             return $ticket;
         })->run();
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    public function update(Ticket $ticket, array $inputs = []): ServiceResult
-    {
-        return ServiceWrapper::make(true)->do(function () {})->run();
     }
 
 
