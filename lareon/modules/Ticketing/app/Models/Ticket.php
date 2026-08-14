@@ -11,7 +11,6 @@ use Lareon\Modules\User\App\Models\User;
 #[Fillable('title', 'body', 'file', 'user_id')]
 class Ticket extends Model
 {
-    protected const REQUIRED_APPROVALS = 2;
     protected function status(): Attribute
     {
         return Attribute::make(
@@ -20,20 +19,14 @@ class Ticket extends Model
                     ? $this->approvals
                     : $this->approvals()->get();
 
-                if ($approvals->isEmpty()) {
-                    return TicketStatusEnum::PENDING;
-                }
+                if ($approvals->isEmpty()) return TicketStatusEnum::PENDING;
 
-                if ($approvals->contains(
-                    fn ($approval) => $approval->status === TicketStatusEnum::REJECTED->value
-                )) {
+
+                if ($approvals->contains(fn ($approval) => $approval->status === TicketStatusEnum::REJECTED->value)) {
                     return TicketStatusEnum::REJECTED;
                 }
 
-                if (
-                    $approvals->where('status', TicketStatusEnum::APPROVED->value)->count()
-                    >= self::REQUIRED_APPROVALS
-                ) {
+                if ($approvals->where('status', TicketStatusEnum::APPROVED->value)->count() >= 2) {
                     return TicketStatusEnum::APPROVED;
                 }
 
@@ -50,7 +43,7 @@ class Ticket extends Model
     }
 
 
-    public function creator()
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

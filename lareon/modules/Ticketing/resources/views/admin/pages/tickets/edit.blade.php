@@ -27,7 +27,7 @@
                 <x-lareon::editor.tabs.section>
                     <x-lareon::editor.input-select name="status" :label="__('change to')" :value="$approval->status->value">
                         @foreach(TicketStatusEnum::cases() as $case)
-                            @continue(in_array($case , [TicketStatusEnum::PENDING,  TicketStatusEnum::IN_REVIEW , $approval->status]))
+                            @continue(in_array($case , [TicketStatusEnum::PENDING,  TicketStatusEnum::IN_REVIEW ]))
                             <option value="{{$case->value}}">
                                 {{$case->label()}}
                             </option>

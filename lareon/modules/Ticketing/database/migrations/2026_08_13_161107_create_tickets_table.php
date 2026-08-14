@@ -39,10 +39,10 @@ return new class extends Migration {
         Schema::create('tickets_api_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
+            $table->string('idempotency_key')->unique();
             $table->unsignedInteger('attempt')->default(1);
             $table->string('status', 32)->index();
             $table->string('request_id')->nullable();
-            $table->string('idempotency_key')->unique();
             $table->unsignedSmallInteger('response_code')->nullable();
             $table->json('response_body')->nullable();
             $table->text('error_message')->nullable();
