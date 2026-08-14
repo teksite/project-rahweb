@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->text('review');
             $table->timestamps();
 
-            $table->unique(['ticket_id']);
+            $table->index(['ticket_id']);
             $table->unique(['ticket_id', 'admin_id', 'role_id', 'round']);
         });
 

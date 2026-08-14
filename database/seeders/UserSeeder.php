@@ -58,7 +58,7 @@ class UserSeeder extends Seeder
             'name'     => 'chief ticket manager',
             'lastname' => 'ticketing',
             'email'    => 'user2@example.com',
-            'password' => Hash::make('user1@example.com'),
+            'password' => Hash::make('user2@example.com'),
             'phone'    => '09126060607',
             'slug'     => '09126060607',
         ]);
