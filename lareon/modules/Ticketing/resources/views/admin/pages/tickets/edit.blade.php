@@ -8,6 +8,11 @@
     @section('form')
         <x-lareon::editor.tabs.item :title="__('content')">
             <x-lareon::editor.tabs.section>
+                <div class="">
+                    {!! $approval->status->toHtml() !!}
+
+                </div>
+                <hr class="border-line_light w-11/12 mx-auto my-3">
                 <h2>
                     {{$ticket->title}}
                 </h2>
@@ -20,9 +25,9 @@
 
             <x-slot:aside>
                 <x-lareon::editor.tabs.section>
-                    <x-lareon::editor.input-select name="status" :label="__('status')" :value="$approval->status->value">
+                    <x-lareon::editor.input-select name="status" :label="__('change to')" :value="$approval->status->value">
                         @foreach(TicketStatusEnum::cases() as $case)
-                            @continue(in_array($case , [TicketStatusEnum::PENDING,  TicketStatusEnum::IN_REVIEW]))
+                            @continue(in_array($case , [TicketStatusEnum::PENDING,  TicketStatusEnum::IN_REVIEW , $approval->status]))
                             <option value="{{$case->value}}">
                                 {{$case->label()}}
                             </option>

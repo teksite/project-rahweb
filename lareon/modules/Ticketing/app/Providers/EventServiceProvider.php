@@ -6,8 +6,10 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
+use Lareon\Modules\Ticketing\App\Events\UpdateTicketStatusEvent;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
 use Lareon\Modules\Ticketing\App\Listeners\NewTicketListener;
+use Lareon\Modules\Ticketing\App\Listeners\UpdateTicketStatusListener;
 
 class EventServiceProvider  extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class EventServiceProvider  extends ServiceProvider
     protected $listen = [
         NewTicketEvent::class=>[
             NewTicketListener::class
+        ],
+        UpdateTicketStatusEvent::class=>[
+            UpdateTicketStatusListener::class
         ]
     ];
 

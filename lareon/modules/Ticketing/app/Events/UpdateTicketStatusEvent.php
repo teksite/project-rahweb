@@ -9,6 +9,8 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Lareon\Modules\Ticketing\App\Models\Ticket;
+use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
 
 class UpdateTicketStatusEvent
 {
@@ -17,7 +19,7 @@ class UpdateTicketStatusEvent
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(public Ticket $ticket , public TicketApprovals $approval)
     {
         //
     }

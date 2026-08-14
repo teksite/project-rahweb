@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
+use Teksite\Authorize\Models\Role;
 
 #[Fillable('ticket_id', 'admin_id', 'role_id', 'round', 'status', 'review',)]
 #[Table('tickets_approvals')]
@@ -16,6 +17,12 @@ class TicketApprovals extends Model
         return [
             'status' => TicketStatusEnum::class,
         ];
+    }
+
+
+    public function role(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
 

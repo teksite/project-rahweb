@@ -35,7 +35,7 @@ class ApprovalTicketLogic
             $user = auth()->user();
             $userId = $user->id;
             $roleId = $user->roles()->first()->id;
-            $ticket = $ticket->approvals()->updateOrCreate(
+            $approval = $ticket->approvals()->updateOrCreate(
                 [
                     'admin_id' => $userId,
                     'role_id' => $roleId,
@@ -45,7 +45,7 @@ class ApprovalTicketLogic
                 ]
 
             );
-            return $ticket->refresh();
+            return $approval->refresh();
         })->run();
     }
 
