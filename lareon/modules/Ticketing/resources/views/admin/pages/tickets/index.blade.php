@@ -7,7 +7,11 @@
                 <tr>
                     <td class="p-3">{{$tickets->firstItem() + $key}}</td>
                     <td>{{$ticket->title}}</td>
-                    <td>{!! $ticket->status->toHtml() !!}</td>
+                    <td>
+                        @foreach($ticket->approvals as $approval)
+                            {!! $approval->status->toHtml() !!}
+                        @endforeach
+                    </td>
                     <td>
                         <x-lareon::date :date="$ticket->created_at"/>
                     </td>

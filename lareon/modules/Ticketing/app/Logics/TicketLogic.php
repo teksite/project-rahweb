@@ -6,8 +6,11 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
+use Lareon\Modules\Ticketing\App\queries\TicketListQuery;
 use Lareon\Modules\Ticketing\App\Services\UploadFileService;
+use Teksite\Authorize\Models\Role;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
@@ -20,9 +23,11 @@ class TicketLogic
      */
     public function all(mixed $fetchData = []): ServiceResult
     {
+
         return ServiceWrapper::make(false)
-                             ->do(fn() => FetchDataService::get(Ticket::class, ['title',]))
+                             ->do(fn() => app(TicketListQuery::class)->paginate())
                              ->run();
+
     }
 
     /**
@@ -55,17 +60,16 @@ class TicketLogic
      */
     public function create(array $inputs = []): ServiceResult
     {
-        $userId=  auth()->id();
-        $file = (new UploadFileService())->store($inputs['file'] , $userId);
+        $userId = auth()->id();
+        $file = (new UploadFileService())->store($inputs['file'], $userId);
 
         return ServiceWrapper::make(true)->do(function () use ($userId, $inputs, $file) {
-            $ticket = Ticket::query()->create([
-                'user_id' =>$userId,
-                'title' => $inputs['title'],
-                'body'  => $inputs['body'],
-                'file'  => $file,
+            return Ticket::query()->create([
+                'user_id' => $userId,
+                'title'   => $inputs['title'],
+                'body'    => $inputs['body'],
+                'file'    => $file,
             ]);
-            return $ticket;
         })->run();
     }
 

@@ -35,44 +35,7 @@ class TicketsController extends Controller implements HasMiddleware
      */
     public function index()
     {
-        $user = auth()->user();
-
-        $chiefTicketManagerRoleId = Role::query()->where('title', 'chief ticket manager')->value('id');
-        $ticketManagerRoleId = Role::query()->where('title', 'ticket manager')->value('id');
-
-        $query = Ticket::query();
-
-        if ($user->hasRole('ticket manager')) {
-
-            $query->where(function ($query) use ($ticketManagerRoleId, $chiefTicketManagerRoleId, $user) {
-
-                $query->whereDoesntHave('approvals')
-                      ->orWhere(function ($query) use ($ticketManagerRoleId, $chiefTicketManagerRoleId, $user) {
-                          $query
-                              ->whereHas('approvals', function ($query) use ($ticketManagerRoleId, $user) {
-                                  $query->where('role_id', $ticketManagerRoleId)->where('admin_id', $user->id);
-                              })->whereDoesntHave('approvals', function ($query) use ($chiefTicketManagerRoleId) {
-                                  $query->where('role_id', $chiefTicketManagerRoleId);
-                              });
-                      });
-            });
-
-        } elseif ($user->hasRole('chief ticket manager')) {
-
-            $query->whereHas('approvals', function ($query) use ($ticketManagerRoleId) {
-                $query->where('role_id', $ticketManagerRoleId)->where('status', TicketStatusEnum::APPROVED->value);
-            })->where(function ($query) use ($chiefTicketManagerRoleId, $user) {
-                $query
-                    ->whereDoesntHave('approvals', function ($query) use ($chiefTicketManagerRoleId) {
-                        $query->where('role_id', $chiefTicketManagerRoleId);
-                    })
-                    ->orWhereHas('approvals', function ($query) use ($chiefTicketManagerRoleId, $user) {
-                        $query->where('role_id', $chiefTicketManagerRoleId)->where('admin_id', $user->id);
-                    });
-            });
-        }
-
-        $tickets = $query->paginate();
+        $tickets= $this->logic->all()->result;
         return view('ticketing::admin.pages.tickets.index', compact('tickets'));
     }
 
