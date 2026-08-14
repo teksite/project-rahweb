@@ -11,6 +11,39 @@ use Lareon\Modules\User\App\Models\User;
 #[Fillable('title', 'body', 'file', 'user_id')]
 class Ticket extends Model
 {
+    protected const REQUIRED_APPROVALS = 2;
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): TicketStatusEnum {
+                $approvals = $this->relationLoaded('approvals')
+                    ? $this->approvals
+                    : $this->approvals()->get();
+
+                if ($approvals->isEmpty()) {
+                    return TicketStatusEnum::PENDING;
+                }
+
+                if ($approvals->contains(
+                    fn ($approval) => $approval->status === TicketStatusEnum::REJECTED->value
+                )) {
+                    return TicketStatusEnum::REJECTED;
+                }
+
+                if (
+                    $approvals->where('status', TicketStatusEnum::APPROVED->value)->count()
+                    >= self::REQUIRED_APPROVALS
+                ) {
+                    return TicketStatusEnum::APPROVED;
+                }
+
+                return TicketStatusEnum::IN_REVIEW;
+            },
+        );
+    }
+
+
+
     public function approvals()
     {
         return $this->hasMany(TicketApprovals::class, 'ticket_id');
@@ -23,23 +56,11 @@ class Ticket extends Model
     }
 
 
-    protected function status(): Attribute
+
+
+
+    public function apiRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        if ($this->approvals()->count()) {
-            if ($this->approvals()->where('status', TicketStatusEnum::REJECTED->value)->count()) {
-                $status = TicketStatusEnum::REJECTED;
-            } elseif ($this->approvals()->where('status', TicketStatusEnum::APPROVED->value)->count() === 2) {
-                $status = TicketStatusEnum::APPROVED;
-            } else {
-                $status = TicketStatusEnum::IN_REVIEW;
-            }
-        } else {
-            $status = TicketStatusEnum::PENDING;
-        }
-
-
-        return Attribute::make(
-            get: fn(mixed $value, array $attributes) => $status,
-        );
+        return $this->hasMany(TicketApi::class, 'ticket_id');
     }
 }

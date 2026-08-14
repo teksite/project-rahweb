@@ -5,6 +5,9 @@ namespace Lareon\Modules\Ticketing\App\Providers;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
+use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
+use Lareon\Modules\Ticketing\App\Listeners\NewTicketListener;
 
 class EventServiceProvider  extends ServiceProvider
 {
@@ -13,7 +16,11 @@ class EventServiceProvider  extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        NewTicketEvent::class=>[
+            NewTicketListener::class
+        ]
+    ];
 
 
     /**

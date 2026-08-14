@@ -4,6 +4,7 @@ namespace Lareon\Modules\Ticketing\App\Http\Controllers\Web\Panel\Tickets;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
@@ -37,7 +38,7 @@ class TicketsController extends Controller implements HasMiddleware
 
     public function create()
     {
-        return view('ticketing::panel.pages.tickets.create', );
+        return view('ticketing::panel.pages.tickets.create');
     }
 
     /**
@@ -45,8 +46,9 @@ class TicketsController extends Controller implements HasMiddleware
      */
     public function store(NewTicketRequest $request)
     {
-        $res =$this->logic->create($request->validated());
+        $res = $this->logic->create($request->validated());
 
-        return Responder::fromResult($res , __('your ticket created') ,__('something went wrong') ,route('panel.tickets.index'))->go();
+        if ($res->success) event(new NewTicketEvent($res->result));
+        return Responder::fromResult($res, __('your ticket created'), __('something went wrong'), route('panel.tickets.index'))->go();
     }
 }

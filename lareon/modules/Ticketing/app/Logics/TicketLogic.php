@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
+use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\queries\TicketListQuery;
 use Lareon\Modules\Ticketing\App\Services\UploadFileService;
@@ -27,7 +28,6 @@ class TicketLogic
         return ServiceWrapper::make(false)
                              ->do(fn() => app(TicketListQuery::class)->paginate())
                              ->run();
-
     }
 
     /**
@@ -64,12 +64,13 @@ class TicketLogic
         $file = (new UploadFileService())->store($inputs['file'], $userId);
 
         return ServiceWrapper::make(true)->do(function () use ($userId, $inputs, $file) {
-            return Ticket::query()->create([
+            $ticket= Ticket::query()->create([
                 'user_id' => $userId,
                 'title'   => $inputs['title'],
                 'body'    => $inputs['body'],
                 'file'    => $file,
             ]);
+            return $ticket;
         })->run();
     }
 

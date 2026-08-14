@@ -7,13 +7,11 @@ use Illuminate\Routing\Controllers\Middleware;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\UpdateApprovalTicketRequest;
 use Lareon\Modules\Ticketing\App\Logics\ApprovalTicketLogic;
 use Lareon\Modules\Ticketing\App\Logics\TicketLogic;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
-use Teksite\Authorize\Models\Role;
 use Teksite\Handler\Facade\Responder;
 
 class TicketsController extends Controller implements HasMiddleware
