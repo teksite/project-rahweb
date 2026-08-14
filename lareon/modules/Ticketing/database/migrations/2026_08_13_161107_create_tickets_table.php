@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('title');
             $table->text('body');
             $table->string('file')->nullable();
-            $table->tinyInteger('status')->default(0);
 
             $table->timestamps();
         });
@@ -29,7 +28,7 @@ return new class extends Migration {
             $table->foreignId('role_id')->constrained('auth_roles')->restrictOnDelete();
             $table->unsignedInteger('round')->default(1);
             $table->tinyInteger('status')->default(0);
-            $table->text('review');
+            $table->text('review')->nullable();
             $table->timestamps();
 
             $table->index(['ticket_id']);

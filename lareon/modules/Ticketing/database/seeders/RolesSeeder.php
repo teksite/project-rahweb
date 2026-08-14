@@ -16,7 +16,7 @@ class RolesSeeder extends Seeder
     {
         Role::query()->insert([
             [
-                'title'       => 'chief ticket manager ',
+                'title'       => 'chief ticket manager',
                 'hierarchy'   => '10',
                 'description' => 'second ticket manger',
             ],

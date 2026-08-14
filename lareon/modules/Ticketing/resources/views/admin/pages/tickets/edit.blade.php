@@ -1,4 +1,4 @@
-<x-lareon::admin-editor :action="route('admin.ticket.update' , $ticket)" method="update" :instance="$ticket" >
+<x-lareon::admin-editor :action="route('admin.tickets.update' , $ticket)" method="update" :instance="$ticket" >
     @section('title', __('lareon::global.crud.titles.edit',['attribute'=>__('page') . " ($ticket->title)"]))
     @section('header.start')
         <x-lareon::links.nav :href="route('admin.tickets.index')" :content="__('lareon::global.buttons.all_attribute' ,['attribute'=>__('tickets')])" color="index"/>
