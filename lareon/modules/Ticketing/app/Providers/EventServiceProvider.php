@@ -9,7 +9,8 @@ use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
 use Lareon\Modules\Ticketing\App\Events\UpdateTicketStatusEvent;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
 use Lareon\Modules\Ticketing\App\Listeners\NewTicketListener;
-use Lareon\Modules\Ticketing\App\Listeners\UpdateTicketStatusListener;
+use Lareon\Modules\Ticketing\App\Listeners\SendByApiListener;
+use Lareon\Modules\Ticketing\App\Listeners\UpdateStatusListener;
 
 class EventServiceProvider  extends ServiceProvider
 {
@@ -23,7 +24,8 @@ class EventServiceProvider  extends ServiceProvider
             NewTicketListener::class
         ],
         UpdateTicketStatusEvent::class=>[
-            UpdateTicketStatusListener::class
+            UpdateStatusListener::class,
+            SendByApiListener::class
         ]
     ];
 

@@ -11,7 +11,7 @@ use Lareon\Modules\Ticketing\App\Notifications\UpdateTicketStatusToAdmin;
 use Lareon\Modules\Ticketing\App\Notifications\UpdateTicketStatusToClient;
 use Lareon\Modules\User\App\Models\User;
 
-class UpdateTicketStatusListener
+class UpdateStatusListener
 {
     /**
      * Create the event listener.
@@ -37,7 +37,6 @@ class UpdateTicketStatusListener
                     $user->notify(new UpdateTicketStatusToAdmin($ticket , $approval));
                 }
             });
-
         }
 
         $ticket->creator?->notify(
