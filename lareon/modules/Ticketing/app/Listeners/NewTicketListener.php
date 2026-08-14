@@ -3,35 +3,31 @@
 namespace Lareon\Modules\Ticketing\App\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Queue\InteractsWithQueue;
 use Lareon\Modules\Ticketing\App\Events\NewTicketEvent;
-use Lareon\Modules\Ticketing\App\Notifications\NewTicketNotification;
+use Lareon\Modules\Ticketing\App\Notifications\NewTicketNotificationToAdmin;
+use Lareon\Modules\Ticketing\App\Notifications\NewTicketNotificationToClient;
 use Lareon\Modules\User\App\Models\User;
 
-class NewTicketListener
+class NewTicketListener implements ShouldQueue
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
+    use InteractsWithQueue;
 
-    /**
-     * Handle the event.
-     */
     public function handle(NewTicketEvent $event): void
     {
         $ticket = $event->ticket;
 
-        $users=User::query()->whereHas('roles', function (Builder $query) use ($ticket) {
-            $query->where('title' ,'ticket manager');
-        });
-        foreach ($users as $user) {
-            $user->notify(new NewTicketNotification($ticket));
-        }
+        User::query()
+            ->whereHas('roles', function ($query) {
+                $query->where('title', 'ticket manager');
+            })->chunk(50, function ($users) use ($ticket) {
+                foreach ($users as $user) {
+                    $user->notify(new NewTicketNotificationToAdmin($ticket));
+                }
+            });
 
+        $ticket->creator?->notify(
+            new NewTicketNotificationToClient($ticket)
+        );
     }
 }

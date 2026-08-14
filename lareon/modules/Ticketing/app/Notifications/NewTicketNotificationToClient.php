@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 
-class NewTicketNotification extends Notification
+class NewTicketNotificationToClient extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -31,25 +31,20 @@ class NewTicketNotification extends Notification
     }
 
     /**
-     * Get the mail representation of the notification.
+     *  Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+        return (new MailMessage)->subject("new Ticket #{$this->ticket->id}")
+                                ->greeting('hi')
+                                ->line('your ticket is submitted in the system')
+                                ->line("**ticket ID:** #{$this->ticket->id}")
+                                ->line('our crew will contact you soon');
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
+    /** * Get the array representation of the notification. */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return ['ticket_id' => $this->ticket->id, 'title' => $this->ticket->title, 'user_id' => $this->ticket->user_id,];
     }
 }
