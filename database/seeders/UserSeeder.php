@@ -15,6 +15,13 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $superUser =$this->makeSuperUser();
+        $this->makeTicketManager($superUser);
+        $this->makeFakeUser($superUser);
+    }
+
+    private function makeSuperUser()
+    {
         $user = User::query()->create([
             'name'     => 'sina',
             'lastname' => 'Zangiband',
@@ -31,11 +38,59 @@ class UserSeeder extends Seeder
 
         if ($ownerRole) $user->roles()->sync($ownerRole->id);
 
+        return $user;
+    }
 
+    private function makeTicketManager(User $superUser)
+    {
+        $user1=User::query()->create([
+            'name'     => 'ticket manager',
+            'lastname' => 'ticketing',
+            'email'    => 'user1@example.com',
+            'password' => Hash::make('user1@example.com'),
+            'phone'    => '09126060606',
+            'slug'     => '09126060606',
+        ]);
+        $user1->markEmailAsVerified();
+        $user1->markPhoneAsVerified();
+
+        $user2=User::query()->create([
+            'name'     => 'chief ticket manager',
+            'lastname' => 'ticketing',
+            'email'    => 'user2@example.com',
+            'password' => Hash::make('user1@example.com'),
+            'phone'    => '09126060607',
+            'slug'     => '09126060607',
+        ]);
+        $user2->markEmailAsVerified();
+        $user2->markPhoneAsVerified();
+
+        $chief = Role::query()->firstWhere('title', 'chief ticket manager')->id;
+        $manager = Role::query()->firstWhere('title', 'ticket manager')->id;
+
+        $user1->roles()->sync([$manager]);
+        $user2->roles()->sync([$chief]);
+    }
+
+    private function makeFakeUser($superUser): void
+    {
         $userRole = Role::query()->firstWhere('title', 'user');
 
+        $user3 = User::create([
+            'parent_id' => $superUser->id,
+            'name'     => 'normal user',
+            'lastname' => 'global',
+            'email'    => 'user3@example.com',
+            'password' => Hash::make('user3@example.com'),
+            'phone'    => '09126060608',
+            'slug'     => '09126060608',
+        ]);
+        $user3->markEmailAsVerified();
+        $user3->markPhoneAsVerified();
+        $user3->roles()->attach($userRole->id);
+
         $users = User::factory(45)->create([
-            'parent_id' => $user->id,
+            'parent_id' => $superUser->id,
         ]);
 
         foreach ($users as $newUser) {

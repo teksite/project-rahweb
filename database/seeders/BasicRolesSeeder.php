@@ -17,21 +17,21 @@ class BasicRolesSeeder extends Seeder
 
         $allPermissions = Permission::query()->select(['id', 'title'])->get();
         $allPermissionIds = $allPermissions->pluck('id')->all();
-        $userPermissionIds = $allPermissions->filter(fn ($permission) => str_starts_with($permission->title, 'panel'))->pluck('id')->all();
-        $ticketPermissionIds = $allPermissions->filter(fn ($permission) => str_starts_with($permission->title, 'admin.ticket'))->pluck('id')->all();
+        $userPermissionIds = $allPermissions->filter(fn($permission) => str_starts_with($permission->title, 'panel'))->pluck('id')->all();
+        $ticketPermissionIds = $allPermissions->filter(fn($permission) => str_starts_with($permission->title, 'admin.ticket'))->pluck('id')->all();
+        $ticketPermissionIds[] = $allPermissions->where('title', 'admin')->first()->id;
 
-
-        foreach (Role::query()->whereIn('title' , ['owner', 'administrator', 'admin',])->get() as $role) {
+        foreach (Role::query()->whereIn('title', ['owner', 'administrator', 'admin',])->get() as $role) {
             $role->permissions()->sync($allPermissionIds);
         }
 
-        foreach (Role::query()->whereIn('title' , ['user'])->get() as $role) {
+        foreach (Role::query()->whereIn('title', ['user'])->get() as $role) {
             $role->permissions()->sync($userPermissionIds);
         }
 
 
 
-        foreach (Role::query()->whereIn('title', ['chief ticket manager', 'ticket manager 2'])->get() as $role) {
+        foreach (Role::query()->whereIn('title', ['chief ticket manager', 'ticket manager'])->get() as $role) {
             $role->permissions()->sync($ticketPermissionIds);
         }
     }

@@ -38,7 +38,7 @@ class MenuProvider implements MenuRegisteringContract
                 'order'  => 104,
                 'icon'   => 'archive',
                 'active' => request()->routeIs('admin.tickets.*'),
-            ], 'user')
+            ], 'ticket')
               ->addManyItem([
                   [
                       'title'      => trans('lareon::global.crud.titles.all', ['attribute' => trans('tickets')]),

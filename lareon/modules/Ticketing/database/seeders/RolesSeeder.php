@@ -21,7 +21,7 @@ class RolesSeeder extends Seeder
                 'description' => 'second ticket manger',
             ],
             [
-                'title'       => 'ticket manager 2',
+                'title'       => 'ticket manager',
                 'hierarchy'   => '11',
                 'description' => 'first ticket manger',
             ],
