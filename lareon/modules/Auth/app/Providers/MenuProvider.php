@@ -45,12 +45,14 @@ class MenuProvider implements MenuRegisteringContract
                 'title'  => 'roles',
                 'order'  => 1,
                 'route'  => 'admin.authorize.roles.index',
+                'permission' => 'admin.role.read',
                 'active' => request()->routeIs('admin.authorize.roles.*'),
             ],
             [
                 'title'  => 'permissions',
                 'order'  => 2,
                 'route'  => 'admin.authorize.permissions.index',
+                'permission' => 'admin.permission.read',
                 'active' => request()->routeIs('admin.authorize.permissions.*'),
             ],
         ], 'auth');

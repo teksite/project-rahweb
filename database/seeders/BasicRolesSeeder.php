@@ -14,7 +14,6 @@ class BasicRolesSeeder extends Seeder
      */
     public function run(): void
     {
-
         $allPermissions = Permission::query()->select(['id', 'title'])->get();
         $allPermissionIds = $allPermissions->pluck('id')->all();
         $userPermissionIds = $allPermissions->filter(fn($permission) => str_starts_with($permission->title, 'panel'))->pluck('id')->all();
