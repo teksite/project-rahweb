@@ -37,6 +37,7 @@ class AdminEditor extends Component
      * Create a new component instance.
      */
     public function __construct(
+        public bool    $editor = true,
         public ?string $method = null,
         public ?string $action = null,
         public bool    $hasFile = false,
@@ -51,7 +52,8 @@ class AdminEditor extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('lareon::admin.layouts.editor', [
+        $data = [
+            'editor'              => $this->instance,
             'instance'            => $this->instance,
             'formAttributes'      => $this->buildFormAttributes(),
             'realMethod'          => $this->buildRealMethod(),
@@ -60,7 +62,11 @@ class AdminEditor extends Component
             'showPublishSection'  => $this->showPublishSection(),
 
             ...$this->resolveButtonPresentation(),
-        ]);
+        ];
+        return $this->editor
+            ?
+            view('lareon::admin.layouts.editor', $data)
+            : view('lareon::admin.layouts.no-editor', $data);
     }
 
 
@@ -70,9 +76,9 @@ class AdminEditor extends Component
         $html_method = in_array($this->methodType, array_keys(Arr::except(self::HttpMethods, ['get']))) ? 'POST' : 'GET';
 
         $finalAttribute = removeNullValues([
-            'method' => $html_method,
-            'action'      => $this->action,
-            'enctype'     => $this->hasFile ? 'multipart/form-data' : null,
+            'method'  => $html_method,
+            'action'  => $this->action,
+            'enctype' => $this->hasFile ? 'multipart/form-data' : null,
         ]);
 
         $attributes = '';

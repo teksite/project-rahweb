@@ -6,8 +6,9 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
-use Lareon\Modules\Ticketing\App\Services\UploadFileService;
+use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
@@ -15,16 +16,26 @@ use Teksite\Handler\Services\FetchDataService;
 
 class ApprovalTicketLogic
 {
-    /**
-     * @throws \Throwable
-     */
-    public function all(mixed $fetchData = []): ServiceResult
-    {
-        return ServiceWrapper::make(false)
-                             ->do(fn() => FetchDataService::get(Ticket::class, ['title',]))
-                             ->run();
-    }
 
+
+    public function firstOrCreate(Ticket $ticket)
+    {
+
+        $user = $this->getUser();
+
+        if (!$user) return new \Teksite\Handler\Actions\ServiceResult(false, null);
+
+        return ServiceWrapper::make(false)->do(function () use ($ticket, $user) {
+            return TicketApprovals::query()->firstOrCreate([
+                'ticket_id' => $ticket->id,
+                'admin_id'  => $user->id,
+                'role_id'   => $user->roles()->first()->id,
+            ], [
+                'status' => TicketStatusEnum::IN_REVIEW->value,
+            ]);
+        });
+
+    }
 
     /**
      * @throws \Throwable
@@ -38,7 +49,7 @@ class ApprovalTicketLogic
             $approval = $ticket->approvals()->updateOrCreate(
                 [
                     'admin_id' => $userId,
-                    'role_id' => $roleId,
+                    'role_id'  => $roleId,
                 ], [
                     'review' => $inputs['review'],
                     'status' => $inputs['status'],
@@ -49,15 +60,10 @@ class ApprovalTicketLogic
         })->run();
     }
 
-
-    /**
-     * @throws \Throwable
-     */
-    public function delete(Ticket $ticket): ServiceResult
+    public function getUser(): \Lareon\Modules\User\App\Models\User|\Illuminate\Contracts\Auth\Authenticatable|null
     {
-        return ServiceWrapper::make(false)->do(function () use ($ticket) {
-            $ticket->delete();
-        })->run();
+        $user = auth()->user();
+        return $user->hasRole(['chief ticket manager', 'ticket manager']) ? $user : null;
     }
 
 }

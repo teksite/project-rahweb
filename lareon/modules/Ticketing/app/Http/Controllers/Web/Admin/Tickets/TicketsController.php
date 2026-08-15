@@ -4,7 +4,6 @@ namespace Lareon\Modules\Ticketing\App\Http\Controllers\Web\Admin\Tickets;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Events\UpdateTicketStatusEvent;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -40,16 +39,7 @@ class TicketsController extends Controller implements HasMiddleware
 
     public function edit(Ticket $ticket)
     {
-        $user = auth()->user();
-
-        $approval = TicketApprovals::query()->firstOrCreate([
-            'ticket_id' => $ticket->id,
-            'admin_id'  => $user->id,
-            'role_id'   => $user->roles()->first()->id,
-        ], [
-            'status' => TicketStatusEnum::IN_REVIEW->value,
-        ]);
-
+       $approval = $this->approvalLogic->firstOrCreate($ticket)->result;
 
         return view('ticketing::admin.pages.tickets.edit', compact('ticket', 'approval'));
     }
@@ -62,7 +52,6 @@ class TicketsController extends Controller implements HasMiddleware
         $res = $this->approvalLogic->update($ticket, $request->validated());
         if ($res->success) event(new UpdateTicketStatusEvent($ticket, $res->result));
         return Responder::fromResult($res, __('the ticket updated'), __('something went wrong'), route('admin.tickets.edit', $ticket))->go();
-
     }
 
     /**
