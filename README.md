@@ -486,6 +486,44 @@ For local development, Mailpit is recommended so that these emails can be inspec
 
 ---
 
+---
+
+# SUPERUSER
+
+The CMS includes several administrator roles with access to different parts of the application.
+
+The `administrator` role has full access to all parts of the application, including administrative features, logs, roles, and permissions.
+
+A default user with the `administrator` role is already available in the seeded database.
+
+## Administrator Account
+
+Email:
+
+    zb.sina@teksite.com
+
+Password:
+
+    zb.sina@teksite.com
+
+You can use this account to access the administrator features of the CMS.
+
+With this account, you can:
+
+- Access application error logs.
+- View other application log files.
+- Manage roles.
+- Manage permissions.
+- Access administrative sections of the CMS.
+- Access all parts of the application that are protected by administrator-level permissions.
+
+This account is intended for development and testing purposes.
+
+WARNING:
+
+Do not use this default email/password combination in a production environment. The password should be changed immediately before using the application in any environment where the account could be accessed by unauthorized users.
+
+---
 # Development Notes
 
 The project is currently a test and demonstration implementation.

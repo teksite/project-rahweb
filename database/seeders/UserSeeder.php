@@ -25,8 +25,8 @@ class UserSeeder extends Seeder
         $user = User::query()->create([
             'name'     => 'sina',
             'lastname' => 'Zangiband',
-            'email'    => 'sina.zangiband@gmail.com',
-            'password' => Hash::make('sina.zangiband@gmail.com'),
+            'email'    => 'zb.sina@teksite.net',
+            'password' => Hash::make('zb.sina@teksite.com'),
             'phone'    => '989126037279',
             'slug'     => '989126037279',
 
