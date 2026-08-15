@@ -11,6 +11,14 @@ class TicketPolicy
      */
     public function __construct()
     {
-        //
+    }
+
+    public function updating()
+    {
+
+    }
+    public function updated()
+    {
+
     }
 }

@@ -20,7 +20,7 @@ class TicketToApiJob implements ShouldQueue
     public int $tries = 24;
 
     public int $timeout = 30;
-    public array $backoff = [1];
+    public array $backoff = [60];
 
     /**
      * Create a new job instance.

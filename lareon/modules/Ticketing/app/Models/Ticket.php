@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\User\App\Models\User;
+use Teksite\Authorize\Models\Role;
 
 #[Fillable('title', 'body', 'file', 'user_id')]
 class Ticket extends Model
@@ -22,7 +23,7 @@ class Ticket extends Model
                 if ($approvals->isEmpty()) return TicketStatusEnum::PENDING;
 
 
-                if ($approvals->contains(fn ($approval) => $approval->status === TicketStatusEnum::REJECTED->value)) {
+                if ($approvals->contains(fn($approval) => $approval->status === TicketStatusEnum::REJECTED->value)) {
                     return TicketStatusEnum::REJECTED;
                 }
 
@@ -34,7 +35,6 @@ class Ticket extends Model
             },
         );
     }
-
 
 
     public function approvals()
@@ -49,11 +49,20 @@ class Ticket extends Model
     }
 
 
-
-
-
     public function apiRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TicketApi::class, 'ticket_id');
+    }
+
+    public function approvementByFirstAdmin()
+    {
+        $roleId = Role::query()->firstWhere('title', 'ticket manager')->id;
+        $this->approvals()->where('status', TicketStatusEnum::APPROVED->value)->where('role_id', $roleId)->first();
+    }
+
+    public function approvementBySecondAdmin()
+    {
+        $roleId = Role::query()->firstWhere('title', 'chief ticket manager')->id;
+        $this->approvals()->where('status', TicketStatusEnum::APPROVED->value)->where('role_id', $roleId)->first();
     }
 }

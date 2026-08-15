@@ -18,12 +18,13 @@ class TicketListQuery
     {
         $query = Ticket::query();
 
+        $query->whereDoesntHave('apiRequests');
+
         $this->applyVisibility($query);
         $this->applySearch($query);
 
         return $query->with('approvals')->paginate();
     }
-
 
     protected function applyVisibility(Builder $query): void
     {
@@ -31,6 +32,7 @@ class TicketListQuery
 
         if ($user->hasRole('ticket manager')) {
             $this->applyTicketManagerVisibility($query);
+
             return;
         }
 
@@ -39,6 +41,7 @@ class TicketListQuery
         }
     }
 
+
     protected function applyTicketManagerVisibility(Builder $query): void
     {
         $user = auth()->user();
@@ -46,20 +49,38 @@ class TicketListQuery
         $ticketManagerRoleId = $this->ticketManagerRoleId();
         $chiefTicketManagerRoleId = $this->chiefTicketManagerRoleId();
 
-        $query->where(function (Builder $query) use ($user, $ticketManagerRoleId, $chiefTicketManagerRoleId) {
+        $query->where(function (Builder $query) use (
+            $user,
+            $ticketManagerRoleId,
+            $chiefTicketManagerRoleId
+        ) {
 
             $query->whereDoesntHave('approvals');
 
-            $query->orWhere(function (Builder $query) use ($user, $ticketManagerRoleId, $chiefTicketManagerRoleId) {
 
-                $query->whereHas('approvals', function (Builder $query) use ($user, $ticketManagerRoleId) {
-                    $query->where('role_id', $ticketManagerRoleId)->where('admin_id', $user->id);
-                })->whereDoesntHave('approvals', function (Builder $query) use ($chiefTicketManagerRoleId) {
-                    $query->where('role_id', $chiefTicketManagerRoleId);
-                });
+            $query->orWhere(function (Builder $query) use (
+                $user,
+                $ticketManagerRoleId,
+                $chiefTicketManagerRoleId
+            ) {
+                $query
+                    ->whereHas('approvals', function (Builder $query) use (
+                        $user,
+                        $ticketManagerRoleId
+                    ) {
+                        $query
+                            ->where('role_id', $ticketManagerRoleId)
+                            ->where('admin_id', $user->id);
+                    })
+                    ->whereDoesntHave('approvals', function (Builder $query) use (
+                        $chiefTicketManagerRoleId
+                    ) {
+                        $query->where('role_id', $chiefTicketManagerRoleId);
+                    });
             });
         });
     }
+
 
     protected function applyChiefTicketManagerVisibility(Builder $query): void
     {
@@ -68,58 +89,82 @@ class TicketListQuery
         $ticketManagerRoleId = $this->ticketManagerRoleId();
         $chiefTicketManagerRoleId = $this->chiefTicketManagerRoleId();
 
-
-        $query->whereHas('approvals', function (Builder $query) use ($ticketManagerRoleId) {
-            $query->where('role_id', $ticketManagerRoleId)->where('status', TicketStatusEnum::APPROVED->value);
+        $query->whereHas('approvals', function (Builder $query) use (
+            $ticketManagerRoleId
+        ) {
+            $query
+                ->where('role_id', $ticketManagerRoleId)
+                ->where('status', TicketStatusEnum::APPROVED->value);
         });
 
-        $query->where(function (Builder $query) use ($user, $chiefTicketManagerRoleId) {
 
-            $query->whereDoesntHave('approvals', function (Builder $query) use ($chiefTicketManagerRoleId) {
+        $query->where(function (Builder $query) use (
+            $user,
+            $chiefTicketManagerRoleId
+        ) {
+            $query
+                ->whereDoesntHave('approvals', function (Builder $query) use (
+                    $chiefTicketManagerRoleId
+                ) {
                     $query->where('role_id', $chiefTicketManagerRoleId);
-                })->orWhereHas('approvals', function (Builder $query) use ($user, $chiefTicketManagerRoleId) {
-                    $query->where('role_id', $chiefTicketManagerRoleId)->where('admin_id', $user->id);
+                })
+                ->orWhereHas('approvals', function (Builder $query) use (
+                    $user,
+                    $chiefTicketManagerRoleId
+                ) {
+                    $query
+                        ->where('role_id', $chiefTicketManagerRoleId)
+                        ->where('admin_id', $user->id);
                 });
         });
     }
-
 
     protected function applySearch(Builder $query): void
     {
         $search = trim(request('s', ''));
 
-        if ($search === '')  return;
-
+        if ($search === '') {
+            return;
+        }
 
         $query->where(function (Builder $query) use ($search) {
-
             $this->searchTitle($query, $search);
-
             $this->searchCreator($query, $search);
-
             $this->searchApprovalStatus($query, $search);
         });
     }
 
-    protected function searchTitle(Builder $query, string  $search): void
-    {
-        $query->where('title', 'like', "%{$search}%");
+    protected function searchTitle(
+        Builder $query,
+        string $search
+    ): void {
+        $query->where(
+            'title',
+            'like',
+            "%{$search}%"
+        );
     }
 
-    protected function searchCreator(Builder $query, string  $search): void
-    {
+    protected function searchCreator(
+        Builder $query,
+        string $search
+    ): void {
         $query->orWhereHas('creator', function (Builder $query) use ($search) {
-
-            $query->where('name', 'like', "%{$search}%")->orWhere('lastname', 'like', "%{$search}%");
+            $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('lastname', 'like', "%{$search}%");
         });
     }
 
-    protected function searchApprovalStatus(Builder $query, string  $search): void
-    {
+    protected function searchApprovalStatus(
+        Builder $query,
+        string $search
+    ): void {
         $status = $this->resolveStatus($search);
 
-        if ($status === null)  return;
-
+        if ($status === null) {
+            return;
+        }
 
         $query->orWhereHas('approvals', function (Builder $query) use ($status) {
             $query->where('status', $status);
@@ -137,14 +182,17 @@ class TicketListQuery
         };
     }
 
-
     protected function ticketManagerRoleId(): int
     {
-        return $this->ticketManagerRoleId ??= Role::query()->where('title', 'ticket manager')->value('id');
+        return $this->ticketManagerRoleId ??= Role::query()
+                                                  ->where('title', 'ticket manager')
+                                                  ->value('id');
     }
 
     protected function chiefTicketManagerRoleId(): int
     {
-        return $this->chiefTicketManagerRoleId ??= Role::query()->where('title', 'chief ticket manager')->value('id');
+        return $this->chiefTicketManagerRoleId ??= Role::query()
+                                                       ->where('title', 'chief ticket manager')
+                                                       ->value('id');
     }
 }
