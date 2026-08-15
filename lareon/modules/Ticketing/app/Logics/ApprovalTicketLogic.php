@@ -16,8 +16,6 @@ use Teksite\Handler\Services\FetchDataService;
 
 class ApprovalTicketLogic
 {
-
-
     public function firstOrCreate(Ticket $ticket)
     {
 
@@ -42,6 +40,10 @@ class ApprovalTicketLogic
      */
     public function update(Ticket $ticket, array $inputs = []): ServiceResult
     {
+        $user = $this->getUser();
+
+        if (!$user) abort(403);
+
         return ServiceWrapper::make(true)->do(function () use ($inputs, $ticket) {
             $user = auth()->user();
             $userId = $user->id;

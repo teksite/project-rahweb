@@ -3,12 +3,11 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $panelUrl = route('panel.index');
-    $adminUrl = route('admin.index');
+    $panelUrl = route('panel.dashboard');
+    $adminUrl = route('admin.dashboard');
     return <<<blade
-<a class="" href="$panelUrl">panel</a>
-<a class="" href="$adminUrl">admin</a>
-
+<a  href="$panelUrl">panel</a>
+<a  href="$adminUrl">admin</a>
 
 blade;
 });
