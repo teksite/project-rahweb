@@ -29,18 +29,16 @@ class UpdateStatusListener
         $ticket = $event->ticket;
         $approval = $event->approval;
 
-        if ($approval->status ===  TicketStatusEnum::APPROVED) {
+        if ($approval->status === TicketStatusEnum::APPROVED) {
             User::query()->whereHas('roles', function ($query) {
                 $query->where('title', 'chief ticket manager');
             })->chunk(50, function ($users) use ($approval, $ticket) {
                 foreach ($users as $user) {
-                    $user->notify(new UpdateTicketStatusToAdmin($ticket , $approval));
+                    $user->notify(new UpdateTicketStatusToAdmin($ticket, $approval));
                 }
             });
         }
 
-        $ticket->creator?->notify(
-            new UpdateTicketStatusToClient($ticket, $approval)
-        );
+        $ticket->creator?->notify(new UpdateTicketStatusToClient($ticket, $approval));
     }
 }

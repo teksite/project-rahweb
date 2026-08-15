@@ -6,13 +6,13 @@
     @endsection
 
     @section('form')
-        <x-lareon::editor.tabs.item :title="__('content')">
+        <x-lareon::editor.tabs.item :title="__('ticket')">
             <x-lareon::editor.tabs.section>
                 <h2>
                     {{$ticket->title}}
                 </h2>
 
-                <div >
+                <div>
                     <p>
                         {{$ticket->body}}
                     </p>
@@ -35,6 +35,8 @@
             </x-lareon::editor.tabs.section>
 
             <x-slot:aside>
+                <iframe class="w-full" height="400" src="{{$ticket->file}}"></iframe>
+
                 @if($approval)
                     <x-lareon::editor.tabs.section>
                         <x-lareon::editor.input-select name="status" :label="__('change to')" :value="$approval->status->value">

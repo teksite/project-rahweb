@@ -58,15 +58,8 @@ class TicketLogic
     public function create(array $inputs = []): ServiceResult
     {
 
-
-        return ServiceWrapper::make(true)->do(function () use ($userId, $inputs, $file) {
-            $ticket = Ticket::query()->create([
-                'user_id' => $userId,
-                'title'   => $inputs['title'],
-                'body'    => $inputs['body'],
-                'file'    => $file,
-            ]);
-            return $ticket;
+        return ServiceWrapper::make(true)->do(function () use ($inputs) {
+            return Ticket::query()->create($inputs);
         })->run();
     }
 

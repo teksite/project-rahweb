@@ -16,14 +16,15 @@ use Teksite\Handler\Services\FetchDataService;
 
 class ApprovalTicketLogic
 {
-    public function firstOrCreate(Ticket $ticket)
+    public function prepareApproval(Ticket $ticket)
     {
-
         $user = $this->getUser();
 
-        if (!$user) return new \Teksite\Handler\Actions\ServiceResult(false, null);
+        if ($user === null){
+            return new \Teksite\Handler\Actions\ServiceResult(false, null);
+        }
+        return ServiceWrapper::make(true)->do(function () use ($ticket , $user) {
 
-        return ServiceWrapper::make(false)->do(function () use ($ticket, $user) {
             return TicketApproval::query()->firstOrCreate([
                 'ticket_id' => $ticket->id,
                 'admin_id'  => $user->id,
@@ -31,7 +32,7 @@ class ApprovalTicketLogic
             ], [
                 'status' => TicketStatusEnum::IN_REVIEW->value,
             ]);
-        });
+        })->run();
 
     }
 

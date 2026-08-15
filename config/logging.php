@@ -58,6 +58,15 @@ return [
             'ignore_exceptions' => false,
         ],
 
+
+        'job' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/job-log.log'),
+            'level' => env('LOG_JOB_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

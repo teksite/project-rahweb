@@ -2,8 +2,10 @@
 
 namespace Lareon\Modules\Ticketing\App\Jobs;
 
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Http\Client\Promises\LazyPromise;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -110,7 +112,7 @@ class TicketToApiJob implements ShouldQueue
     /**
      * Send ticket to external API.
      */
-    protected function sendRequest(Ticket $ticket, TicketApi $apiRequest): \GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\Promises\LazyPromise|\Illuminate\Http\Client\Response
+    protected function sendRequest(Ticket $ticket, TicketApi $apiRequest): PromiseInterface|LazyPromise|Response
     {
         return Http::acceptJson()
                    ->withoutVerifying()
@@ -150,7 +152,7 @@ class TicketToApiJob implements ShouldQueue
             'error_message' => null,
         ]);
 
-        Log::info(
+        Log::driver('job')->info(
             'Ticket successfully sent to external API.',
             ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'response_code' => $response->status(),]);
     }
@@ -159,13 +161,14 @@ class TicketToApiJob implements ShouldQueue
     protected function markAsFailed(TicketApi $apiRequest, Response $response): void
     {
         $apiRequest->update(['status' => 'failed', 'response_code' => $response->status(), 'response_body' => $response->body(), 'error_message' => $response->body(),]);
-        Log::warning('Ticket API request failed.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'response_code' => $response->status(),]);
+        Log::driver('job')->warning('Ticket API request failed.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'response_code' => $response->status(),]);
     }
 
     /** * Mark API request as failed because of exception. */
     protected function markAsException(TicketApi $apiRequest, \Throwable $exception): void
     {
         $apiRequest->update(['status' => 'failed', 'error_message' => $exception->getMessage(),]);
+        Log::driver('job')->error('Ticket API request threw an exception.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'exception' => $exception::class, 'message' => $exception->getMessage(),]);
         Log::error('Ticket API request threw an exception.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'exception' => $exception::class, 'message' => $exception->getMessage(),]);
     }
 }

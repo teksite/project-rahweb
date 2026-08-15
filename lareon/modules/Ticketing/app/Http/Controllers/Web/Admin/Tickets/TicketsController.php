@@ -45,7 +45,7 @@ class TicketsController extends Controller implements HasMiddleware
 
     public function edit(Ticket $ticket)
     {
-        $approval = $this->approvalLogic->firstOrCreate($ticket)->result;
+        $approval = $this->approvalLogic->prepareApproval($ticket)->result;
         return view('ticketing::admin.pages.tickets.edit', compact('ticket', 'approval'));
     }
 

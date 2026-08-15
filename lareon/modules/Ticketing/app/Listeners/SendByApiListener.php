@@ -24,6 +24,5 @@ class SendByApiListener implements ShouldQueue
             TicketToApiJob::dispatch($ticket);
         }
 
-
     }
 }

@@ -49,7 +49,7 @@ class TicketsController extends Controller implements HasMiddleware
     {
 
         $userId = auth()->id();
-        
+
         $file = (new UploadFileService())->store($request->file('file'), $userId);
 
         $inputs = array_merge($request->validated(), ['file' => $file, 'user_id' => $userId]);
@@ -58,6 +58,9 @@ class TicketsController extends Controller implements HasMiddleware
 
         if ($res->success) event(new NewTicketEvent($res->result));
 
-        return Responder::fromResult($res, __('your ticket created'), __('something went wrong'), route('panel.tickets.index'))->go();
+        return Responder::fromResult($res,
+            __('your ticket created'),
+            __('something went wrong'),
+            route('panel.tickets.index'))->go();
     }
 }
