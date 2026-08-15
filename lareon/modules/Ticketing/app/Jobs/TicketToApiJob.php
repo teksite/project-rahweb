@@ -119,7 +119,7 @@ class TicketToApiJob implements ShouldQueue
                    ->timeout(15)
                    ->connectTimeout(5)
                    ->withHeaders(['Idempotency-Key' => $apiRequest->idempotency_key,])
-                   ->post('https://demo-cms.test/api/endpoint', $this->payload($ticket));
+                   ->post(url('/api/endpoint'), $this->payload($ticket));
     }
 
     /** * Build API payload. */
