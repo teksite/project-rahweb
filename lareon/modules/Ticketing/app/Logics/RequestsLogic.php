@@ -6,13 +6,14 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
+use Lareon\Modules\Ticketing\App\Models\TicketApi;
 use Lareon\Modules\Ticketing\App\queries\TicketListQuery;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
 
 
-class TicketLogic
+class RequestsLogic
 {
     /**
      * @throws \Throwable
@@ -21,17 +22,7 @@ class TicketLogic
     {
 
         return ServiceWrapper::make(false)
-                             ->do(fn() => app(TicketListQuery::class)->paginate())
-                             ->run();
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    public function allByUser(mixed $fetchData = []): ServiceResult
-    {
-        return ServiceWrapper::make(false)
-                             ->do(fn() => FetchDataService::get(auth()->user()->tickets(), ['title']))
+                             ->do(fn() => app(TicketApi::class)->paginate())
                              ->run();
     }
 
@@ -43,32 +34,22 @@ class TicketLogic
     public function first(array $inputs = [], bool $any = true): ServiceResult
     {
         return ServiceWrapper::make(false)->do(function () use ($inputs) {
-            $query = Ticket::query();
+            $query = TicketApi::query();
             foreach ($inputs as $key => $value) {
                 $query->where($key, $value);
             }
         })->run();
     }
 
-    /**
-     * @throws \Throwable
-     */
-    public function create(array $inputs = []): ServiceResult
-    {
-
-        return ServiceWrapper::make(true)->do(function () use ($inputs) {
-            return Ticket::query()->create($inputs);
-        })->run();
-    }
 
 
     /**
      * @throws \Throwable
      */
-    public function delete(Ticket $ticket): ServiceResult
+    public function delete(TicketApi $req): ServiceResult
     {
-        return ServiceWrapper::make(false)->do(function () use ($ticket) {
-            $ticket->delete();
+        return ServiceWrapper::make(false)->do(function () use ($req) {
+            $req->delete();
         })->run();
     }
 

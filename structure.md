@@ -1537,21 +1537,7 @@ A more robust implementation should use immutable role keys or identifiers.
 
 These two approaches should be unified.
 
----
 
-## Approval Rounds
-
-The database supports:
-
-    round
-
-but the current business logic primarily uses:
-
-    round = 1
-
-A future multi-round workflow can make better use of this field.
-
----
 
 ## Ticket Status
 
