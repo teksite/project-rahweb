@@ -3,22 +3,22 @@
 namespace Lareon\Modules\Ticketing\App\Action;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApproval;
 use Teksite\Authorize\Models\Role;
+
 class TicketBulkAction
 {
-    private const REVIEW = 'review';
-    private const APPROVE = 'approve';
-    private const REJECT = 'reject';
+    private const string REVIEW = 'review';
+    private const string APPROVE = 'approve';
+    private const string REJECT = 'reject';
 
-    private const TICKET_MANAGER = 'ticket manager';
-    private const CHIEF_TICKET_MANAGER = 'chief ticket manager';
+    private const string TICKET_MANAGER = 'ticket manager';
+    private const string CHIEF_TICKET_MANAGER = 'chief ticket manager';
 
-    private const CHUNK_SIZE = 500;
+    private const int CHUNK_SIZE = 500;
 
     protected ?int $ticketManagerRoleId = null;
 
@@ -55,21 +55,23 @@ class TicketBulkAction
     |--------------------------------------------------------------------------
     */
 
-    protected function handleAsTicketManager(string $action, int $userId): int {
+    protected function handleAsTicketManager(
+        string $action,
+        int $userId
+    ): int {
         return match ($action) {
-
             self::REVIEW => $this->reviewAsTicketManager($userId),
 
             self::APPROVE => $this->changeOwnApprovalStatus(
                 userId: $userId,
                 roleId: $this->ticketManagerRoleId(),
-                status: TicketStatusEnum::APPROVED
+                status: TicketStatusEnum::APPROVED,
             ),
 
             self::REJECT => $this->changeOwnApprovalStatus(
                 userId: $userId,
                 roleId: $this->ticketManagerRoleId(),
-                status: TicketStatusEnum::REJECTED
+                status: TicketStatusEnum::REJECTED,
             ),
         };
     }
@@ -83,7 +85,7 @@ class TicketBulkAction
         return $this->createApprovals(
             query: $query,
             userId: $userId,
-            roleId: $this->ticketManagerRoleId()
+            roleId: $this->ticketManagerRoleId(),
         );
     }
 
@@ -98,34 +100,22 @@ class TicketBulkAction
         int $userId
     ): int {
         return match ($action) {
-
             self::REVIEW => $this->reviewAsChief($userId),
 
             self::APPROVE => $this->changeOwnApprovalStatus(
                 userId: $userId,
                 roleId: $this->chiefTicketManagerRoleId(),
-                status: TicketStatusEnum::APPROVED
+                status: TicketStatusEnum::APPROVED,
             ),
 
             self::REJECT => $this->changeOwnApprovalStatus(
                 userId: $userId,
                 roleId: $this->chiefTicketManagerRoleId(),
-                status: TicketStatusEnum::REJECTED
+                status: TicketStatusEnum::REJECTED,
             ),
         };
     }
 
-    /**
-     * Chief:
-     *
-     * Ticket باید:
-     *
-     * 1. API Request نداشته باشد
-     * 2. Manager 1 آن را APPROVE کرده باشد
-     * 3. Chief approval نداشته باشد
-     *
-     * → برای Chief approval ساخته می‌شود.
-     */
     protected function reviewAsChief(int $userId): int
     {
         $managerRoleId = $this->ticketManagerRoleId();
@@ -156,7 +146,7 @@ class TicketBulkAction
         return $this->createApprovals(
             query: $query,
             userId: $userId,
-            roleId: $chiefRoleId
+            roleId: $chiefRoleId,
         );
     }
 
@@ -171,29 +161,44 @@ class TicketBulkAction
         int $roleId,
         TicketStatusEnum $status
     ): int {
-        return TicketApproval::query()
+        $count = 0;
 
-            // فقط approvalهای خود کاربر
-                              ->where('admin_id', $userId)
+        TicketApproval::query()
+                      ->where('admin_id', $userId)
+                      ->where('role_id', $roleId)
 
-            // فقط approval مربوط به role خودش
-                              ->where('role_id', $roleId)
-
-            // فقط مواردی که Review شده‌اند
-                              ->where(
+            // فقط approvalهایی که در review هستند
+                      ->where(
                 'status',
                 TicketStatusEnum::IN_REVIEW->value
             )
 
-            // Ticket هنوز وارد API نشده باشد
-                              ->whereHas('ticket', function (Builder $query) {
+            // Ticket نباید وارد API شده باشد
+                      ->whereHas('ticket', function (Builder $query) {
                 $query->whereDoesntHave('apiRequests');
             })
 
-                              ->update([
-                                  'status' => $status->value,
-                                  'updated_at' => now(),
-                              ]);
+                      ->chunkById(
+                          self::CHUNK_SIZE,
+                          function ($approvals) use (
+                              $status,
+                              &$count
+                          ) {
+                              foreach ($approvals as $approval) {
+                                  $approval->status = $status;
+
+                                  if (! $approval->isDirty('status')) {
+                                      continue;
+                                  }
+
+                                  $approval->save();
+
+                                  $count++;
+                              }
+                          }
+                      );
+
+        return $count;
     }
 
     /*
@@ -231,14 +236,12 @@ class TicketBulkAction
                     ])
                     ->all();
 
-                if (!$rows) {
+                if (empty($rows)) {
                     return;
                 }
 
-                $inserted = TicketApproval::query()
-                                           ->insertOrIgnore($rows);
-
-                $count += $inserted;
+                $count += TicketApproval::query()
+                                        ->insertOrIgnore($rows);
             }
         );
 
@@ -253,7 +256,7 @@ class TicketBulkAction
 
     protected function validateAction(string $action): void
     {
-        if (!in_array($action, [
+        if (! in_array($action, [
             self::REVIEW,
             self::APPROVE,
             self::REJECT,
