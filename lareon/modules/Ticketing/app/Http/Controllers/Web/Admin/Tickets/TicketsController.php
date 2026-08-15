@@ -7,11 +7,11 @@ use Illuminate\Routing\Controllers\Middleware;
 use Lareon\Modules\Ticketing\App\Events\UpdateTicketStatusEvent;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Lareon\Modules\Ticketing\App\Http\Requests\Panel\BulkActionTicketRequest;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\UpdateApprovalTicketRequest;
 use Lareon\Modules\Ticketing\App\Logics\ApprovalTicketLogic;
 use Lareon\Modules\Ticketing\App\Logics\TicketLogic;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
-use Lareon\Modules\Ticketing\App\Models\TicketApproval;
 use Teksite\Handler\Facade\Responder;
 
 class TicketsController extends Controller implements HasMiddleware
@@ -55,7 +55,6 @@ class TicketsController extends Controller implements HasMiddleware
     public function update(UpdateApprovalTicketRequest $request, Ticket $ticket)
     {
         $res = $this->approvalLogic->update($ticket, $request->validated());
-        if ($res->success) event(new UpdateTicketStatusEvent($ticket, $res->result));
         return Responder::fromResult($res, __('the ticket updated'), __('something went wrong'), route('admin.tickets.edit', $ticket))->go();
     }
 
@@ -66,6 +65,15 @@ class TicketsController extends Controller implements HasMiddleware
     {
         $res = $this->logic->delete($ticket);
         return Responder::fromResult($res, __('the ticket deleted'), __('something went wrong'), route('admin.tickets.index'))->go();
+
+    }
+
+    public function bulk(BulkActionTicketRequest $request)
+    {
+        $action=$request->validated()['action'];
+        $res = $this->approvalLogic->bulkAction($action);
+        return Responder::fromResult($res, __('all done'), __('something went wrong'), route('admin.tickets.index'))->go();
+
 
     }
 }

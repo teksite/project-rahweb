@@ -3,15 +3,18 @@
 namespace Lareon\Modules\Ticketing\App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
+use Lareon\Modules\Ticketing\App\Observers\TicketApprovalObserver;
 use Lareon\Modules\User\App\Models\User;
 use Teksite\Authorize\Models\Role;
 
 #[Fillable('ticket_id', 'admin_id', 'role_id', 'round', 'status', 'review',)]
 #[Table('tickets_approvals')]
+#[ObservedBy([TicketApprovalObserver::class])]
 class TicketApproval extends Model
 {
     protected function casts(): array
@@ -28,7 +31,7 @@ class TicketApproval extends Model
     }
 
 
-    public function tickets(): BelongsTo
+    public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class, 'ticket_id');
     }
