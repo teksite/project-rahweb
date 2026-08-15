@@ -23,7 +23,7 @@ class TicketListQuery
         $this->applyVisibility($query);
         $this->applySearch($query);
 
-        return $query->with('approvals')->paginate();
+        return $query->with(['approvals' ,'approvals.admin' ,'approvals.role'])->paginate();
     }
 
     protected function applyVisibility(Builder $query): void

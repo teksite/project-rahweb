@@ -2,7 +2,7 @@
 
 namespace Lareon\Modules\Ticketing\App\Action;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
@@ -55,10 +55,7 @@ class TicketBulkAction
     |--------------------------------------------------------------------------
     */
 
-    protected function handleAsTicketManager(
-        string $action,
-        int $userId
-    ): int {
+    protected function handleAsTicketManager(string $action, int $userId): int {
         return match ($action) {
 
             self::REVIEW => $this->reviewAsTicketManager($userId),
@@ -77,15 +74,6 @@ class TicketBulkAction
         };
     }
 
-    /**
-     * Manager 1:
-     *
-     * تمام Ticketهایی که:
-     * - API Request ندارند
-     * - هیچ approval ندارند
-     *
-     * → IN_REVIEW
-     */
     protected function reviewAsTicketManager(int $userId): int
     {
         $query = Ticket::query()

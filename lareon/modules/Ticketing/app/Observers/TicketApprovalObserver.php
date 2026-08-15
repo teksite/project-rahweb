@@ -10,22 +10,8 @@ class TicketApprovalObserver
 {
     public function updated(TicketApproval $approval): void
     {
-        if (!$approval->wasChanged('status')) {
-            return;
-        }
-
-        if ($approval->status !== TicketStatusEnum::APPROVED) {
-            return;
-        }
-
-        if ($approval->role_id === $this->ticketManagerRoleId()) {
-            TicketApprovedByManager::dispatch($approval);
-
-            return;
-        }
-
-        if ($approval->role_id === $this->chiefTicketManagerRoleId()) {
-            TicketApprovedByChief::dispatch($approval);
-        }
+        $ticket= $approval->ticket;
+        dd($ticket);
+        event(new UpdateTicketStatusEvent($ticket , $approval));
     }
 }

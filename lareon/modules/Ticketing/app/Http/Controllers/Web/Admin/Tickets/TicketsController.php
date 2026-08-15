@@ -4,7 +4,6 @@ namespace Lareon\Modules\Ticketing\App\Http\Controllers\Web\Admin\Tickets;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Lareon\Modules\Ticketing\App\Events\UpdateTicketStatusEvent;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\BulkActionTicketRequest;

@@ -22,7 +22,7 @@ class BulkActionTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => 'required|string|in:approve,reject',
+            'action' => 'required|string|in:approve,reject,review',
         ];
     }
 }

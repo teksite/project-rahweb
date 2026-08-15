@@ -8,9 +8,17 @@
                     <td class="p-3">{{$tickets->firstItem() + $key}}</td>
                     <td>{{$ticket->title}}</td>
                     <td>
-                        @foreach($ticket->approvals as $approval)
-                            {!! $approval->status->toHtml() !!}
-                        @endforeach
+                        <div class="">
+                            @foreach($ticket->approvals as $approval)
+                                <div class="flex  w-fit min-w-fit text-xs text-gray-600">
+                                    {!! $approval->status->toHtml() !!}
+                                    <span>
+                                        {{$approval->admin->fullname}} ({{$approval->role->title}})
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+
                     </td>
                     <td>
                         <x-lareon::date :date="$ticket->created_at"/>
@@ -36,7 +44,6 @@
                                     <option value="">none</option>
                                     <option value="review">{{__('review all')}}</option>
                                     <option value="approve">{{__('approve all')}}</option>
-                                    <option value="reject">{{__('reject all')}}</option>
                                     <option value="reject">{{__('reject all')}}</option>
                                 </x-lareon::editor.input-select>
                                 <x-lareon::buttons.nav class="min-w-36" :fullWidth="false" type="submit" color="update" size="xs">
