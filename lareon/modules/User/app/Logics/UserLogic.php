@@ -60,7 +60,11 @@ class UserLogic
         return ServiceWrapper::make(true)->do(function () use ($inputs) {
             $inputs['slug'] ??= strtolower(uniqid() . '-' . Str::random(4));
             $inputs['parent_id'] = auth()->id();
+            // TODO remove below code and remove from User fillable
+            $inputs['phone_verified_at']=now();
+            $inputs['email_verified_at']=now();
             $user = User::create($inputs);
+
             $rolesIds = $this->assignRole($user, config('general.default_user_role', 'user'));
             return $user;
         })->run();
