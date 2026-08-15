@@ -9,6 +9,7 @@ use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lareon\Modules\Ticketing\App\Http\Requests\Panel\NewTicketRequest;
 use Lareon\Modules\Ticketing\App\Logics\TicketLogic;
+use Lareon\Modules\Ticketing\App\Services\UploadFileService;
 use Teksite\Handler\Facade\Responder;
 
 class TicketsController extends Controller implements HasMiddleware
@@ -46,9 +47,17 @@ class TicketsController extends Controller implements HasMiddleware
      */
     public function store(NewTicketRequest $request)
     {
-        $res = $this->logic->create($request->validated());
+
+        $userId = auth()->id();
+        
+        $file = (new UploadFileService())->store($request->file('file'), $userId);
+
+        $inputs = array_merge($request->validated(), ['file' => $file, 'user_id' => $userId]);
+
+        $res = $this->logic->create($inputs);
 
         if ($res->success) event(new NewTicketEvent($res->result));
+
         return Responder::fromResult($res, __('your ticket created'), __('something went wrong'), route('panel.tickets.index'))->go();
     }
 }

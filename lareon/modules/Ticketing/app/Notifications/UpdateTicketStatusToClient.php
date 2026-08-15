@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
-use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
+use Lareon\Modules\Ticketing\App\Models\TicketApproval;
 
 class UpdateTicketStatusToClient extends Notification implements ShouldQueue
 {
@@ -27,7 +27,7 @@ class UpdateTicketStatusToClient extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Ticket $ticket, public TicketApprovals $approval)
+    public function __construct(public Ticket $ticket, public TicketApproval $approval)
     {
         $this->afterCommit();
     }

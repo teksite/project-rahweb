@@ -64,8 +64,7 @@ class AdminEditor extends Component
             ...$this->resolveButtonPresentation(),
         ];
         return $this->editor
-            ?
-            view('lareon::admin.layouts.editor', $data)
+            ? view('lareon::admin.layouts.editor', $data)
             : view('lareon::admin.layouts.no-editor', $data);
     }
 

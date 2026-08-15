@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
-use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
+use Lareon\Modules\Ticketing\App\Models\TicketApproval;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
@@ -24,7 +24,7 @@ class ApprovalTicketLogic
         if (!$user) return new \Teksite\Handler\Actions\ServiceResult(false, null);
 
         return ServiceWrapper::make(false)->do(function () use ($ticket, $user) {
-            return TicketApprovals::query()->firstOrCreate([
+            return TicketApproval::query()->firstOrCreate([
                 'ticket_id' => $ticket->id,
                 'admin_id'  => $user->id,
                 'role_id'   => $user->roles()->first()->id,

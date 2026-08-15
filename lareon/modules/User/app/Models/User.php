@@ -18,7 +18,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Sanctum\HasApiTokens;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
-use Lareon\Modules\Ticketing\App\Models\TicketApprovals;
+use Lareon\Modules\Ticketing\App\Models\TicketApproval;
 use Lareon\Modules\User\Database\Factories\UserFactory;
 use Teksite\Authorize\Traits\HasAuthorization;
 use Teksite\Extralaravel\Enums\MobilePatterns;
@@ -107,7 +107,7 @@ class User extends Authenticatable implements MustVerifyEmail , PasskeyUser
 
     public function ticketApprovals(): HasMany
     {
-        return $this->hasMany(TicketApprovals::class ,'admin_id');
+        return $this->hasMany(TicketApproval::class ,'admin_id');
     }
 
 }

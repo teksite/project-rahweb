@@ -39,7 +39,7 @@ class Ticket extends Model
 
     public function approvals()
     {
-        return $this->hasMany(TicketApprovals::class, 'ticket_id');
+        return $this->hasMany(TicketApproval::class, 'ticket_id');
     }
 
 

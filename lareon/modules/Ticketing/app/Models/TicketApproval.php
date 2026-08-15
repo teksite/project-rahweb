@@ -12,7 +12,7 @@ use Teksite\Authorize\Models\Role;
 
 #[Fillable('ticket_id', 'admin_id', 'role_id', 'round', 'status', 'review',)]
 #[Table('tickets_approvals')]
-class TicketApprovals extends Model
+class TicketApproval extends Model
 {
     protected function casts(): array
     {
