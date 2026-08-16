@@ -14,7 +14,16 @@
             <tr>
                 <td class="p-3">{{$tickets->firstItem() + $key}}</td>
                 <td>{{$ticket->title}}</td>
-                <td>{!! $ticket->status->value !!}</td>
+                <td>
+                    @foreach($ticket->approvals as $approval)
+                        <div class="flex  w-fit min-w-fit text-xs text-gray-600">
+                            {!! $approval->status->toHtml() !!}
+                            <span>
+                                 {{$approval->admin->fullname}} ({{$approval->role->title}})
+                            </span>
+                        </div>
+                    @endforeach
+                </td>
                 <td>
                     <x-lareon::date :date="$ticket->created_at"/>
                 </td>
