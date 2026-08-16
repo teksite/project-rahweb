@@ -40,7 +40,7 @@
                         <td colspan="9" class="p-2">
                             <form method="POST" action="{{route('admin.tickets.index')}}" class="flex items-center gap-1">
                                 @method('PATCH')
-                                <x-lareon::editor.input-select :label="__('approve all')" name="action" labelPosition="start">
+                                <x-lareon::editor.input-select :label="__('bulk action')" name="action" labelPosition="start">
                                     <option value="">none</option>
                                     <option value="review">{{__('review all')}}</option>
                                     <option value="approve">{{__('approve all')}}</option>

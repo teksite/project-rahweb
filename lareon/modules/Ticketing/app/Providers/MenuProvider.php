@@ -49,10 +49,10 @@ class MenuProvider implements MenuRegisteringContract
 
                   ],
                   [
-                      'title'      => trans('lareon::global.crud.titles.all', ['attribute' => trans('logs')]),
-                      'order'      => 1,
-                      'route'      => 'admin.tickets.logs.index',
-                      'active'     => request()->routeIs('admin.tickets.logs.index'),
+                      'title'      => trans('lareon::global.crud.titles.all', ['attribute' => trans('requests')]),
+                      'order'      => 2,
+                      'route'      => 'admin.tickets.requests.index',
+                      'active'     => request()->routeIs('admin.tickets.requests.index'),
                       'permission' => 'admin.ticket.read',
 
                   ]

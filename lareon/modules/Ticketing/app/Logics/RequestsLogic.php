@@ -7,7 +7,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApi;
-use Lareon\Modules\Ticketing\App\queries\TicketListQuery;
 use Teksite\Handler\Actions\ServiceWrapper;
 use Teksite\Handler\contracts\ServiceResult;
 use Teksite\Handler\Services\FetchDataService;
@@ -22,8 +21,9 @@ class RequestsLogic
     {
 
         return ServiceWrapper::make(false)
-                             ->do(fn() => app(TicketApi::class)->paginate())
-                             ->run();
+                             ->do(
+                                 fn() => FetchDataService::get(TicketApi::class, ['status', 'ticket.title'], with: ['ticket'])
+                             )->run();
     }
 
 

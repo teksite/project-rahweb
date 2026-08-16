@@ -19,7 +19,7 @@ class TicketApi extends Model
         return $this->belongsTo(Ticket::class);
     }
 
-    public function approvals(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function approvals()
     {
         return $this->hasManyThrough(TicketApproval::class, Ticket::class, 'ticket_id', 'ticket_id', 'id', 'id');
     }
