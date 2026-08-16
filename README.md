@@ -226,8 +226,14 @@ If you are using Laragon, you can configure a local domain such as:
 
 The exact domain depends on your local Laragon configuration.
 
+
 ---
 
+# Running QUEUE
+
+    php artisan queue:work
+
+---
 # Important Notes
 
 ## Development and Local Usage Only
@@ -345,7 +351,7 @@ Regular users can access their dashboard through:
 
 From the right-side menu, select:
 
-    تیکت ها
+    Tickets
 
 The user can then create and manage their tickets.
 
@@ -500,11 +506,11 @@ A default user with the `administrator` role is already available in the seeded 
 
 Email:
 
-    zb.sina@teksite.com
+    zb.sina@teksite.net
 
 Password:
 
-    zb.sina@teksite.com
+    zb.sina@teksite.net
 
 You can use this account to access the administrator features of the CMS.
 
