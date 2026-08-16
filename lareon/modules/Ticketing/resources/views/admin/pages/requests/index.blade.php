@@ -18,7 +18,7 @@
                     <td>
                         <x-lareon::date :date="$item->completed_at"/>
                     </td>  <td>
-                        {{$item->status}}
+                        {{$item->status->label()}}
                     </td>
 
                 </tr>

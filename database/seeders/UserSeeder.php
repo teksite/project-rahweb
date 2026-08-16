@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             'name'     => 'sina',
             'lastname' => 'Zangiband',
             'email'    => 'zb.sina@teksite.net',
-            'password' => Hash::make('zb.sina@teksite.com'),
+            'password' => Hash::make('zb.sina@teksite.net'),
             'phone'    => '989126037279',
             'slug'     => '989126037279',
 

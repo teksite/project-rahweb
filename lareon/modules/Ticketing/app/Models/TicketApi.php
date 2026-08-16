@@ -21,8 +21,6 @@ class TicketApi extends Model
             'status'=>ApiStatusEnum::class,
             'error_message'=>'json',
             'response_body'=>'json',
-            'completed_at'=>'timestamp',
-            'sent_at'=>'timestamp',
         ];
     }
 

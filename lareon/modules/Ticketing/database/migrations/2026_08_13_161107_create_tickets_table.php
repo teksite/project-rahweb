@@ -41,7 +41,7 @@ return new class extends Migration {
             $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
             $table->string('idempotency_key')->unique();
             $table->unsignedInteger('attempt')->default(1);
-            $table->string('status', 32)->index();
+            $table->tinyInteger('status')->index();
             $table->string('request_id')->nullable();
             $table->unsignedSmallInteger('response_code')->nullable();
             $table->json('response_body')->nullable();
