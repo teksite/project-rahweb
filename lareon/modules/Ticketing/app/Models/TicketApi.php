@@ -19,9 +19,9 @@ class TicketApi extends Model
         return $this->belongsTo(Ticket::class);
     }
 
-    public function approvals()
-    {
-        return $this->hasManyThrough(TicketApproval::class, Ticket::class, 'ticket_id', 'ticket_id', 'id', 'id');
-    }
+//    public function approvals()
+//    {
+//        return $this->hasManyThrough(Ticket::class ,TicketApproval::class , 'ticket_id', 'ticket_id', 'id', 'id');
+//    }
 
 }

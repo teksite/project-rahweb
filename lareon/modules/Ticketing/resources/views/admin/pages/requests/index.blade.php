@@ -2,35 +2,25 @@
     @section('title', __('lareon::global.crud.titles.list',['attribute'=>__('tickets')]))
 
     @section('list')
-        <x-lareon::table :rows="$items" :headers="['id'=>'#','title'=>__('title'),'status'=>__('status'),'created_at'=>__('created at') ,'user_id'=> __('creator')]">
-            @foreach($items as $key=>$ticket)
+        <x-lareon::table :rows="$items" :headers="['id'=>'#','title'=>__('title'),'user.name'=>__('creator'),'sent_at'=>__('sent at'),'attempt'=>__('attempt'),'competed_at'=> __('competed at') ,'status'=> __('status')]">
+            @foreach($items as $key=>$item)
                 <tr>
                     <td class="p-3">{{$items->firstItem() + $key}}</td>
-                    <td>{{$ticket->title}}</td>
-                    <td>
-                        <div class="">
-                            @foreach($ticket->approvals as $approval)
-                                <div class="flex  w-fit min-w-fit text-xs text-gray-600">
-                                    {!! $approval->status->toHtml() !!}
-                                    <span>
-                                        {{$approval->admin->fullname}} ({{$approval->role->title}})
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
+                    <td>{{$item->ticket->title}}</td>
+                    <td> {{$item->ticket->creator->fullname ?? '-'}} </td>
 
+                    <td>
+                        <x-lareon::date :date="$item->created_at"/>
                     </td>
                     <td>
-                        <x-lareon::date :date="$ticket->created_at"/>
+                        {{$item->attempt}}
                     </td>
-                    <td> {{$ticket->creator->fullname ?? '-'}} </td>
                     <td>
-                        <x-lareon::action-box class="action">
-                            <x-lareon::links.action type="show" :href="route('admin.tickets.show' , $ticket)" can="admin.ticket.read"/>
-                            <x-lareon::links.action type="edit" :href="route('admin.tickets.edit' , $ticket)" can="admin.ticket.edit"/>
-                            <x-lareon::links.action type="delete" method="delete" :href="route('admin.tickets.destroy' , $ticket)" can="admin.ticket.delete"/>
-                        </x-lareon::action-box>
+                        <x-lareon::date :date="$item->completed_at"/>
+                    </td>  <td>
+                        {{$item->status}}
                     </td>
+
                 </tr>
             @endforeach
             <x-slot:foot>

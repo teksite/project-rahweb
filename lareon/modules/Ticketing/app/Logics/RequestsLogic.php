@@ -22,7 +22,7 @@ class RequestsLogic
 
         return ServiceWrapper::make(false)
                              ->do(
-                                 fn() => FetchDataService::get(TicketApi::class, ['status', 'ticket.title'], with: ['ticket'])
+                                 fn() => FetchDataService::get(TicketApi::class, ['status', 'ticket.title'], with: ['ticket','ticket.creator'])
                              )->run();
     }
 
