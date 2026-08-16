@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Promises\LazyPromise;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Lareon\Modules\Ticketing\App\Enums\ApiStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApi;
 use Lareon\Modules\User\App\Http\Resources\UserResource;
@@ -78,7 +79,7 @@ class TicketToApiJob implements ShouldQueue
                 'idempotency_key' => $this->idempotencyKey($ticket),],
             [
                 'attempt' => 0,
-                'status'  => 'pending',
+                'status'  => ApiStatusEnum::PENDING->value
             ]);
     }
 
@@ -93,7 +94,7 @@ class TicketToApiJob implements ShouldQueue
      */
     protected function alreadySucceeded(TicketApi $apiRequest): bool
     {
-        return $apiRequest->status === 'success';
+        return $apiRequest->status === ApiStatusEnum::SUCCESS;
     }
 
     /**
@@ -103,7 +104,7 @@ class TicketToApiJob implements ShouldQueue
     {
         $apiRequest->increment('attempt');
         $apiRequest->update([
-            'status'        => 'processing',
+            'status'        => ApiStatusEnum::PROCESSING->value,
             'sent_at'       => now(),
             'error_message' => null,
         ]);
@@ -145,7 +146,7 @@ class TicketToApiJob implements ShouldQueue
     protected function markAsSuccessful(TicketApi $apiRequest, Response $response): void
     {
         $apiRequest->update([
-            'status'        => 'success',
+            'status'        => ApiStatusEnum::SUCCESS->value,
             'response_code' => $response->status(),
             'response_body' => $response->body(),
             'completed_at'  => now(),
@@ -160,14 +161,14 @@ class TicketToApiJob implements ShouldQueue
     /** * Mark API request as failed because of HTTP response. */
     protected function markAsFailed(TicketApi $apiRequest, Response $response): void
     {
-        $apiRequest->update(['status' => 'failed', 'response_code' => $response->status(), 'response_body' => $response->body(), 'error_message' => $response->body(),]);
+        $apiRequest->update(['status' => ApiStatusEnum::FAILED, 'response_code' => $response->status(), 'response_body' => $response->body(), 'error_message' => $response->body(),]);
         Log::driver('job')->warning('Ticket API request failed.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'response_code' => $response->status(),]);
     }
 
     /** * Mark API request as failed because of exception. */
     protected function markAsException(TicketApi $apiRequest, \Throwable $exception): void
     {
-        $apiRequest->update(['status' => 'failed', 'error_message' => $exception->getMessage(),]);
+        $apiRequest->update(['status' => ApiStatusEnum::FAILED, 'error_message' => $exception->getMessage(),]);
         Log::driver('job')->error('Ticket API request threw an exception.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'exception' => $exception::class, 'message' => $exception->getMessage(),]);
         Log::error('Ticket API request threw an exception.', ['ticket_id' => $apiRequest->ticket_id, 'api_request_id' => $apiRequest->id, 'attempt' => $apiRequest->attempt, 'exception' => $exception::class, 'message' => $exception->getMessage(),]);
     }

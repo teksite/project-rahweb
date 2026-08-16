@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Lareon\Modules\Ticketing\App\Enums\ApiStatusEnum;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\User\App\Models\User;
 
@@ -13,6 +14,17 @@ use Lareon\Modules\User\App\Models\User;
 #[Fillable('ticket_id', 'idempotency_key', 'attempt', 'status', 'request_id', 'response_code', 'response_body', 'error_message', 'sent_at' ,'completed_at')]
 class TicketApi extends Model
 {
+
+    protected function casts(): array
+    {
+        return [
+            'status'=>ApiStatusEnum::class,
+            'error_message'=>'json',
+            'response_body'=>'json',
+            'completed_at'=>'timestamp',
+            'sent_at'=>'timestamp',
+        ];
+    }
 
     public function ticket(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

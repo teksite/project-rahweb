@@ -7,7 +7,6 @@ use Illuminate\Routing\Controllers\Middleware;
 use Lareon\Modules\Ticketing\App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Lareon\Modules\Ticketing\App\Logics\RequestsLogic;
-use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApi;
 
 class TicketApiRequestsController extends Controller implements HasMiddleware
