@@ -16,6 +16,7 @@
                                         {{$approval->admin->fullname}} ({{$approval->role->title}})
                                     </span>
                                 </div>
+                                </div>
                             @endforeach
                         </div>
 
@@ -28,7 +29,7 @@
                         <x-lareon::action-box class="action">
                             <x-lareon::links.action type="show" :href="route('admin.tickets.show' , $ticket)" can="admin.ticket.read"/>
                             <x-lareon::links.action type="edit" :href="route('admin.tickets.edit' , $ticket)" can="admin.ticket.edit"/>
-                            <x-lareon::links.action type="delete" method="delete" :href="route('admin.tickets.destroy' , $ticket)" can="admin.ticket.delete"/>
+{{--                            <x-lareon::links.action type="delete" method="delete" :href="route('admin.tickets.destroy' , $ticket)" can="admin.ticket.delete"/>--}}
                         </x-lareon::action-box>
                     </td>
                 </tr>
