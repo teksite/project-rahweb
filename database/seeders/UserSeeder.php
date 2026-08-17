@@ -65,8 +65,8 @@ class UserSeeder extends Seeder
         $user2->markEmailAsVerified();
         $user2->markPhoneAsVerified();
 
-        $chief = Role::query()->firstWhere('title', 'chief ticket manager')->id;
-        $manager = Role::query()->firstWhere('title', 'ticket manager')->id;
+        $chief = Role::query()->firstWhere('title', config('ticketing.admin.level_1' , 'ticket manager'))->id;
+        $manager = Role::query()->firstWhere('title', config('ticketing.admin.level_2' , 'chief ticket manager'))->id;
 
         $user1->roles()->sync([$manager]);
         $user2->roles()->sync([$chief]);

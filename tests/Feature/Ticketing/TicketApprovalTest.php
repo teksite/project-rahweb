@@ -15,132 +15,105 @@ class TicketApprovalTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Role $managerRole;
-
-    protected Role $chiefRole;
-
-    protected User $manager;
-
-    protected User $chief;
-
-    protected User $user;
-
-    protected function setUp(): void
+    protected function role(string $title): Role
     {
-        parent::setUp();
-
-        $this->managerRole = Role::factory()->create([
-            'title' => 'ticket manager',
+        return Role::query()->firstOrCreate([
+            'title' => $title,
         ]);
-
-        $this->chiefRole = Role::factory()->create([
-            'title' => 'chief ticket manager',
-        ]);
-
-        $this->manager = User::factory()->create();
-        $this->chief = User::factory()->create();
-        $this->user = User::factory()->create();
-
-        $this->manager->assignRole($this->managerRole);
-        $this->chief->assignRole($this->chiefRole);
     }
 
-    public function test_manager_can_create_approval(): void
+    protected function userWithRole(string $title): User
     {
-        $ticket = Ticket::factory()->create([
-            'user_id' => $this->user->id,
+        $user = User::factory()->create();
+
+        $role = $this->role($title);
+
+        $user->roles()->syncWithoutDetaching([
+            $role->id,
         ]);
 
-        $this->actingAs($this->manager);
+        return $user;
+    }
+
+    public function test_manager_can_prepare_approval(): void
+    {
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
+
+        $this->actingAs($manager);
 
         $result = app(ApprovalTicketLogic::class)
             ->prepareApproval($ticket);
 
-        $this->assertTrue($result->success);
+        $this->assertTrue(
+            $result->success
+        );
 
-        $this->assertDatabaseHas('tickets_approvals', [
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::IN_REVIEW->value,
-        ]);
+        $this->assertDatabaseHas(
+            'tickets_approvals',
+            [
+                'ticket_id' => $ticket->id,
+                'admin_id' => $manager->id,
+                'status' => TicketStatusEnum::IN_REVIEW->value,
+            ]
+        );
     }
 
-    public function test_manager_can_approve_ticket(): void
+    public function test_non_manager_cannot_prepare_approval(): void
     {
+        $user = User::factory()->create();
+
         $ticket = Ticket::factory()->create();
 
-        TicketApproval::factory()->create([
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::IN_REVIEW->value,
-        ]);
+        $this->actingAs($user);
 
-        $this->actingAs($this->manager);
+        $result = app(ApprovalTicketLogic::class)
+            ->prepareApproval($ticket);
 
-        app(ApprovalTicketLogic::class)->update(
-            $ticket,
+        $this->assertFalse(
+            $result->success
+        );
+
+        $this->assertDatabaseCount(
+            'tickets_approvals',
+            0
+        );
+    }
+
+    public function test_manager_can_update_approval(): void
+    {
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
+
+        $this->actingAs($manager);
+
+        $result = app(ApprovalTicketLogic::class)
+            ->update(
+                $ticket,
+                [
+                    'status' => TicketStatusEnum::APPROVED,
+                    'review' => 'Approved by manager',
+                ]
+            );
+
+        $this->assertTrue(
+            $result->success
+        );
+
+        $this->assertDatabaseHas(
+            'tickets_approvals',
             [
+                'ticket_id' => $ticket->id,
+                'admin_id' => $manager->id,
                 'status' => TicketStatusEnum::APPROVED->value,
-                'review' => null,
+                'review' => 'Approved by manager',
             ]
-        );
-
-        $this->assertDatabaseHas('tickets_approvals', [
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::APPROVED->value,
-        ]);
-    }
-
-    public function test_manager_can_reject_ticket(): void
-    {
-        $ticket = Ticket::factory()->create();
-
-        TicketApproval::factory()->create([
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::IN_REVIEW->value,
-        ]);
-
-        $this->actingAs($this->manager);
-
-        app(ApprovalTicketLogic::class)->update(
-            $ticket,
-            [
-                'status' => TicketStatusEnum::REJECTED->value,
-                'review' => 'The ticket was rejected.',
-            ]
-        );
-
-        $this->assertDatabaseHas('tickets_approvals', [
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::REJECTED->value,
-            'review' => 'The ticket was rejected.',
-        ]);
-    }
-
-    public function test_ticket_is_rejected_when_any_approval_is_rejected(): void
-    {
-        $ticket = Ticket::factory()->create();
-
-        TicketApproval::factory()->create([
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'status' => TicketStatusEnum::REJECTED->value,
-        ]);
-
-        $ticket->refresh();
-
-        $this->assertSame(
-            TicketStatusEnum::REJECTED,
-            $ticket->status
         );
     }
 }

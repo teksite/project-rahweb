@@ -3,6 +3,7 @@
 namespace Lareon\Modules\Ticketing\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\User\App\Models\User;
 use Teksite\Authorize\Models\Role;
@@ -19,12 +20,14 @@ class TicketApprovalFactory extends Factory
      */
     public function definition(): array
     {
-             return [
+        $role = Role::query()->first();
+
+        return [
                  'ticket_id' => Ticket::factory(),
                  'admin_id' => User::factory(),
-                 'role_id' => Role::query()->first()?->id,
+                 'role_id' => $role?->id,
                  'round' => 1,
-                 'status' => 0,
+                 'status' => TicketStatusEnum::IN_REVIEW,
                  'review' => null,
              ];
     }

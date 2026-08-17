@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApproval;
+use Lareon\Modules\Ticketing\App\Models\TicketApi;
 use Lareon\Modules\Ticketing\App\queries\TicketListQuery;
 use Lareon\Modules\User\App\Models\User;
 use Tests\TestCase;
@@ -15,168 +16,230 @@ class TicketVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Role $managerRole;
+    protected Role $ticketManagerRole;
 
-    protected Role $chiefRole;
-
-    protected User $manager;
-
-    protected User $anotherManager;
-
-    protected User $chief;
+    protected Role $chiefTicketManagerRole;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->managerRole = Role::query()->create([
+        $this->ticketManagerRole = Role::query()->firstOrCreate([
             'title' => 'ticket manager',
         ]);
 
-        $this->chiefRole = Role::query()->create([
+        $this->chiefTicketManagerRole = Role::query()->firstOrCreate([
             'title' => 'chief ticket manager',
         ]);
+    }
 
-        $this->manager = User::factory()->create();
+    protected function userWithRole(string $roleTitle): User
+    {
+        $user = User::factory()->create();
 
-        $this->anotherManager = User::factory()->create();
+        $role = match ($roleTitle) {
+            'ticket manager' => $this->ticketManagerRole,
+            'chief ticket manager' => $this->chiefTicketManagerRole,
+            default => Role::query()->firstOrCreate([
+                'title' => $roleTitle,
+            ]),
+        };
 
-        $this->chief = User::factory()->create();
+        $user->roles()->syncWithoutDetaching([
+            $role->id,
+        ]);
 
-        $this->manager->assignRole($this->managerRole);
-
-        $this->anotherManager->assignRole($this->managerRole);
-
-        $this->chief->assignRole($this->chiefRole);
+        return $user;
     }
 
     public function test_manager_can_see_ticket_without_approval(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
 
-        $this->actingAs($this->manager);
+        $ticket = Ticket::factory()->create();
+
+        $this->actingAs($manager);
 
         $result = app(TicketListQuery::class)->paginate();
 
+        $ids = $result->getCollection()->pluck('id');
+
         $this->assertTrue(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 
     public function test_manager_can_see_own_approval(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
 
         TicketApproval::factory()->create([
             'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'round' => 1,
-            'status' => TicketStatusEnum::IN_REVIEW->value,
+            'admin_id' => $manager->id,
+            'role_id' => $this->ticketManagerRole->id,
+            'status' => TicketStatusEnum::IN_REVIEW,
         ]);
 
-        $this->actingAs($this->manager);
+        $this->actingAs($manager);
 
         $result = app(TicketListQuery::class)->paginate();
+
+        $ids = $result->getCollection()->pluck('id');
 
         $this->assertTrue(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 
-    public function test_manager_cannot_see_another_manager_ticket(): void
+    public function test_manager_cannot_see_another_manager_approval(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager1 = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $manager2 = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
 
         TicketApproval::factory()->create([
             'ticket_id' => $ticket->id,
-            'admin_id' => $this->anotherManager->id,
-            'role_id' => $this->managerRole->id,
-            'round' => 1,
-            'status' => TicketStatusEnum::IN_REVIEW->value,
+            'admin_id' => $manager2->id,
+            'role_id' => $this->ticketManagerRole->id,
+            'status' => TicketStatusEnum::IN_REVIEW,
         ]);
 
-        $this->actingAs($this->manager);
+        $this->actingAs($manager1);
 
         $result = app(TicketListQuery::class)->paginate();
+
+        $ids = $result->getCollection()->pluck('id');
 
         $this->assertFalse(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 
-    public function test_chief_can_see_manager_approved_ticket(): void
+    public function test_chief_cannot_see_ticket_before_first_manager_approval(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $chief = $this->userWithRole(
+            'chief ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
 
         TicketApproval::factory()->create([
             'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'round' => 1,
-            'status' => TicketStatusEnum::APPROVED->value,
+            'admin_id' => $manager->id,
+            'role_id' => $this->ticketManagerRole->id,
+            'status' => TicketStatusEnum::IN_REVIEW,
         ]);
 
-        $this->actingAs($this->chief);
+        $this->actingAs($chief);
 
         $result = app(TicketListQuery::class)->paginate();
+
+        $ids = $result->getCollection()->pluck('id');
+
+        $this->assertFalse(
+            $ids->contains($ticket->id)
+        );
+    }
+
+    public function test_chief_can_see_ticket_after_first_manager_approval(): void
+    {
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
+
+        $chief = $this->userWithRole(
+            'chief ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
+
+        TicketApproval::factory()->create([
+            'ticket_id' => $ticket->id,
+            'admin_id' => $manager->id,
+            'role_id' => $this->ticketManagerRole->id,
+            'status' => TicketStatusEnum::APPROVED,
+        ]);
+
+        $this->actingAs($chief);
+
+        $result = app(TicketListQuery::class)->paginate();
+
+        $ids = $result->getCollection()->pluck('id');
 
         $this->assertTrue(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 
-    public function test_chief_cannot_see_ticket_without_manager_approval(): void
+    public function test_chief_cannot_see_rejected_ticket(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
 
-        $this->actingAs($this->chief);
+        $chief = $this->userWithRole(
+            'chief ticket manager'
+        );
+
+        $ticket = Ticket::factory()->create();
+
+        TicketApproval::factory()->create([
+            'ticket_id' => $ticket->id,
+            'admin_id' => $manager->id,
+            'role_id' => $this->ticketManagerRole->id,
+            'status' => TicketStatusEnum::REJECTED,
+        ]);
+
+        $this->actingAs($chief);
 
         $result = app(TicketListQuery::class)->paginate();
 
+        $ids = $result->getCollection()->pluck('id');
+
         $this->assertFalse(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 
-    public function test_chief_cannot_see_ticket_after_his_approval(): void
+    public function test_manager_cannot_see_ticket_that_has_api_request(): void
     {
-        $ticket = Ticket::factory()
-                        ->createdBy($this->manager)
-                        ->create();
+        $manager = $this->userWithRole(
+            'ticket manager'
+        );
 
-        TicketApproval::factory()->create([
+        $ticket = Ticket::factory()->create();
+
+        TicketApi::query()->create([
             'ticket_id' => $ticket->id,
-            'admin_id' => $this->manager->id,
-            'role_id' => $this->managerRole->id,
-            'round' => 1,
-            'status' => TicketStatusEnum::APPROVED->value,
+            'idempotency_key' => 'ticket:' . $ticket->id . ':approved',
+            'attempt' => 1,
+            'status' => 0,
         ]);
 
-        TicketApproval::factory()->create([
-            'ticket_id' => $ticket->id,
-            'admin_id' => $this->chief->id,
-            'role_id' => $this->chiefRole->id,
-            'round' => 1,
-            'status' => TicketStatusEnum::APPROVED->value,
-        ]);
-
-        $this->actingAs($this->chief);
+        $this->actingAs($manager);
 
         $result = app(TicketListQuery::class)->paginate();
 
+        $ids = $result->getCollection()->pluck('id');
+
         $this->assertFalse(
-            $result->contains('id', $ticket->id)
+            $ids->contains($ticket->id)
         );
     }
 }

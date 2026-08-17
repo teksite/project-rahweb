@@ -29,8 +29,9 @@ class BasicRolesSeeder extends Seeder
         }
 
 
-
-        foreach (Role::query()->whereIn('title', ['chief ticket manager', 'ticket manager'])->get() as $role) {
+        $admin1 = config('ticketing.admin.level_1', 'ticket manager');
+        $admin2 = config('ticketing.admin.level_2', 'chief ticket manager');
+        foreach (Role::query()->whereIn('title', [$admin1, $admin2])->get() as $role) {
             $role->permissions()->sync($ticketPermissionIds);
         }
     }
