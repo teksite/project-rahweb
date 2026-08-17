@@ -44,9 +44,12 @@ class TicketLogic
     {
         return ServiceWrapper::make(false)->do(function () use ($inputs) {
             $query = Ticket::query();
+
             foreach ($inputs as $key => $value) {
                 $query->where($key, $value);
             }
+
+            return $query->first();
         })->run();
     }
 

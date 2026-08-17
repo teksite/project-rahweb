@@ -35,10 +35,13 @@ class RequestsLogic
     {
         return ServiceWrapper::make(false)->do(function () use ($inputs) {
             $query = TicketApi::query();
+
             foreach ($inputs as $key => $value) {
                 $query->where($key, $value);
             }
-        })->run();
+
+            return $query->first();
+        });
     }
 
 

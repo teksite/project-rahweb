@@ -2,81 +2,87 @@
 
 namespace Lareon\Modules\Ticketing\App\Logics;
 
-
+use Illuminate\Contracts\Auth\Authenticatable;
 use Lareon\Modules\Ticketing\App\Action\TicketBulkAction;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
 use Lareon\Modules\Ticketing\App\Models\Ticket;
 use Lareon\Modules\Ticketing\App\Models\TicketApproval;
-use Teksite\Authorize\Models\Role;
+use Teksite\Handler\Actions\ServiceResult;
 use Teksite\Handler\Actions\ServiceWrapper;
-use Teksite\Handler\contracts\ServiceResult;
-use Teksite\Handler\Services\FetchDataService;
-
+use Teksite\Handler\contracts\ServiceResult as ServiceResultContract;
 
 class ApprovalTicketLogic
 {
-    public function prepareApproval(Ticket $ticket)
+    public function prepareApproval(Ticket $ticket): ServiceResultContract
     {
         $user = $this->getUser();
 
-        if ($user === null) {
-            return new \Teksite\Handler\Actions\ServiceResult(false, null);
-        }
-        return ServiceWrapper::make(false)->do(function () use ($ticket, $user) {
+        if ($user === null) return new ServiceResult(false, null);
 
-            return TicketApproval::query()->firstOrCreate([
-                'ticket_id' => $ticket->id,
-                'admin_id'  => $user->id,
-                'role_id'   => $user->roles()->first()->id,
-            ], [
-                'status' => TicketStatusEnum::IN_REVIEW->value,
-            ]);
-        })->run();
 
+        return ServiceWrapper::make(false)
+                             ->do(function () use ($ticket, $user) {
+                                 $roleId = $user->roles()->first()?->id;
+
+                                 if (!$roleId) {
+                                     return null;
+                                 }
+
+                                 return TicketApproval::query()->firstOrCreate(
+                                     [
+                                         'ticket_id' => $ticket->id,
+                                         'admin_id'  => $user->id,
+                                         'role_id'   => $roleId,
+                                         'round'     => 1,
+                                     ],
+                                     [
+                                         'status' => TicketStatusEnum::IN_REVIEW,
+                                     ]
+                                 );
+                             })
+                             ->run();
     }
 
-    /**
-     * @throws \Throwable
-     */
-    public function update(Ticket $ticket, array $inputs = []): ServiceResult
+    public function update(Ticket $ticket, array $inputs = []): ServiceResultContract
     {
         $user = $this->getUser();
+
         if ($user === null) abort(403);
 
 
-        return ServiceWrapper::make(false)->do(function () use ($inputs, $ticket) {
-            $user = auth()->user();
-            $userId = $user->id;
-            $roleId = $user->roles()->first()->id;
-            $approval = $ticket->approvals()->updateOrCreate(
+        return ServiceWrapper::make(false)->do(function () use ($inputs, $ticket, $user) {
+            $roleId = $user->roles()->first()?->id;
+            if (!$roleId) abort(403);
+
+            return $ticket->approvals()->updateOrCreate(
                 [
-                    'admin_id' => $userId,
+                    'admin_id' => $user->id,
                     'role_id'  => $roleId,
-                ], [
-                    'review' => $inputs['review'],
+                    'round'    => 1,
+                ],
+                [
+                    'review' => $inputs['review'] ?? null,
                     'status' => $inputs['status'],
                 ]
-
-            );
-            return $approval->refresh();
+            )->refresh();
         })->run();
     }
 
-
-    public function bulkAction(string $action)
+    public function bulkAction(string $action): ServiceResultContract
     {
-        return ServiceWrapper::make(false)->do(function () use ($action) {
-            return app(TicketBulkAction::class)->handle($action);
-
-        })->run();
-
+        return ServiceWrapper::make(false)->do(
+            fn() => app(TicketBulkAction::class)
+                ->handle($action)
+        )->run();
     }
 
-    public function getUser(): \Lareon\Modules\User\App\Models\User|\Illuminate\Contracts\Auth\Authenticatable|null
+    public function getUser(): ?Authenticatable
     {
         $user = auth()->user();
-        return $user->hasRole(['chief ticket manager', 'ticket manager']) ? $user : null;
+
+        if (!$user) return null;
+
+
+        return $user->hasRole(['chief ticket manager', 'ticket manager',]) ? $user : null;
     }
-
 }
-

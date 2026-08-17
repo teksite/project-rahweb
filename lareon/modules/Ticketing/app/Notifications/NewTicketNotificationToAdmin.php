@@ -41,7 +41,7 @@ class NewTicketNotificationToAdmin extends Notification implements ShouldQueue
                                 ->line("**ticket ID:** #{$this->ticket->id}")
                                 ->line("**title:** {$this->ticket->title}")
                                 ->line("**description:** {$this->ticket->body}")
-                                ->when($this->ticket->user, fn(MailMessage $mail) => $mail->line("**creator:** {$this->ticket->user->name}"))
+                                ->when($this->ticket->user, fn(MailMessage $mail) => $mail->line("**creator:** {$this->ticket->creator->name}"))
                                 ->line('please, check the ticket and do what is necessary')
                                 ->action('visit', route('admin.tickets.edit', $this->ticket));
     }

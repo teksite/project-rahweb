@@ -3,8 +3,7 @@
 namespace Tests\Unit\Ticketing;
 
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
-use PHPUnit\Framework\TestCase;
-
+use Tests\TestCase;
 class TicketStatusEnumTest extends TestCase
 {
     public function test_pending_status(): void

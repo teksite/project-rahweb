@@ -3,15 +3,23 @@
 namespace Lareon\Modules\Ticketing\App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Lareon\Modules\Ticketing\App\Enums\TicketStatusEnum;
+use Lareon\Modules\Ticketing\Database\Factories\TicketFactory;
 use Lareon\Modules\User\App\Models\User;
 use Teksite\Authorize\Models\Role;
 
+#[UseFactory(TicketFactory::class)]
 #[Fillable('title', 'body', 'file', 'user_id')]
 class Ticket extends Model
 {
+    use HasFactory;
+
     protected function status(): Attribute
     {
         return Attribute::make(
@@ -20,14 +28,21 @@ class Ticket extends Model
                     ? $this->approvals
                     : $this->approvals()->get();
 
-                if ($approvals->isEmpty()) return TicketStatusEnum::PENDING;
+                if ($approvals->isEmpty()) {
+                    return TicketStatusEnum::PENDING;
+                }
 
-
-                if ($approvals->contains(fn($approval) => $approval->status === TicketStatusEnum::REJECTED->value)) {
+                if ($approvals->contains(
+                    fn (TicketApproval $approval) =>
+                        $approval->status === TicketStatusEnum::REJECTED
+                )) {
                     return TicketStatusEnum::REJECTED;
                 }
 
-                if ($approvals->where('status', TicketStatusEnum::APPROVED->value)->count() >= 2) {
+                if ($approvals->where(
+                        'status',
+                        TicketStatusEnum::APPROVED
+                    )->count() >= 2) {
                     return TicketStatusEnum::APPROVED;
                 }
 
@@ -36,33 +51,46 @@ class Ticket extends Model
         );
     }
 
-
-    public function approvals()
+    public function approvals(): HasMany
     {
         return $this->hasMany(TicketApproval::class, 'ticket_id');
     }
 
-
-    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-
-    public function apiRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function apiRequests(): HasMany
     {
         return $this->hasMany(TicketApi::class, 'ticket_id');
     }
 
-    public function approvementByFirstAdmin()
+    public function approvementByFirstAdmin(): ?TicketApproval
     {
-        $roleId = Role::query()->firstWhere('title', 'ticket manager')->id;
-        $this->approvals()->where('status', TicketStatusEnum::APPROVED->value)->where('role_id', $roleId)->first();
+        $roleId = Role::query()
+                      ->where('title', 'ticket manager')
+                      ->value('id');
+
+        if (!$roleId) return null;
+
+        return $this->approvals()
+                    ->where('status', TicketStatusEnum::APPROVED)
+                    ->where('role_id', $roleId)
+                    ->first();
     }
 
-    public function approvementBySecondAdmin()
+    public function approvementBySecondAdmin(): ?TicketApproval
     {
-        $roleId = Role::query()->firstWhere('title', 'chief ticket manager')->id;
-        $this->approvals()->where('status', TicketStatusEnum::APPROVED->value)->where('role_id', $roleId)->first();
+        $roleId = Role::query()
+                      ->where('title', 'chief ticket manager')
+                      ->value('id');
+
+        if (!$roleId)  return null;
+
+        return $this->approvals()
+                    ->where('status', TicketStatusEnum::APPROVED)
+                    ->where('role_id', $roleId)
+                    ->first();
     }
 }
